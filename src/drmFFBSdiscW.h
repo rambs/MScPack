@@ -1,12 +1,12 @@
 
-#include <Rcpp.h>
+//#include <Rcpp.h>
 //[[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
+//#include <RcppArmadillo.h>
 
 // funcao FFBS para regressao com V constante e fator de desconto
 using namespace arma;
 
-Rcpp::List drmFFBSfixVdiscW(mat Y, mat X, mat dV, double discW, vec m0, mat ZC0){
+Rcpp::List drmFFBSdiscW(mat Y, mat X, mat dV, double discW, vec m0, mat ZC0){
 int T = Y.n_rows; // ATENCAO: matriz de dados deve entrar T x q!!
 int q = Y.n_cols; 
 int r = q*X.n_cols; // ATENCAO: matriz de exogenas deve entrar sendo T x p
