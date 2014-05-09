@@ -1,6 +1,7 @@
 
 //[[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#include <Rcpp/Benchmark/Timer.h>
 
 using namespace Rcpp;
 using namespace arma;
@@ -22,6 +23,7 @@ using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List fdlmGibbs(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal)
 {
+  Rcpp::Timer timer;
   // leitura dos argumentos da funcao
 mat Y = as<arma::mat>(model["y"]);
 mat xFix = as<arma::mat>(model["xFixReg"]); //exogenas reg estatica
@@ -177,7 +179,11 @@ for (j=0; j<N; j++){
 }
 printf("\n Algoritmo concluido. \n");
 
-Rcpp::List gibbs = Rcpp::List::create(Named("N") = N, Named("burn") = brn, 
+timer.step("Gibbs routine");
+Rcpp::NumericVector duration(timer);
+duration[0] = duration[0]/1000000000;
+
+Rcpp::List gibbs = Rcpp::List::create(Named("duration") = duration, Named("N") = N, Named("burn") = brn, 
 Named("thin") = thn, Named("theta") = theta, Named("Beta") = Beta,
 Named("Lambda") = Lambda, Named("Factors") = Factors, Named("psi") = psi, Named("ZW") = ZW,
 Named("MuFix") = MuFix, Named("MuDyn") = MuDyn, Named("Mu") = Mu);
