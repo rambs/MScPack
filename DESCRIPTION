@@ -9,3 +9,4 @@ Description: Elementos necessarios para aplicacao de F-DLM e FSV-DLM.
 License: GPL-2
 Depends: Rcpp (>= 0.11.1), RcppArmadillo (>= 0.3.920.3)
 LinkingTo: Rcpp, RcppArmadillo
+Roxygen: list(wrap = FALSE)
