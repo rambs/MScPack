@@ -9,7 +9,45 @@
 #' @param model modelo F-DLM com valores da matriz de dados, de exogenas e hiperparametros da priori.
 #' @param initVal valores iniciais para Beta, Lambda e psi.
 #' @return Lista com modelo e valores simulados do Gibbs.
-fdlmGibbs <- function(N, brn, thn, model, initVal) {
-    .Call('MScPack_fdlmGibbs', PACKAGE = 'MScPack', N, brn, thn, model, initVal)
+fdlmGibbs <- function(N, brn, thn, model, initVal, progressBar, onlyValues) {
+    .Call('MScPack_fdlmGibbs', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
+}
+
+#' Quantidades iniciais para Gibbs F-DLM
+#' 
+#' Calculo de quantidades inicias para evitar repeticao de operacoes identicas a cada iteracao do algoritmo de Gibbs..
+#' @param model modelo F-DLM com valores da matriz de dados, de exogenas e hiperparametros da priori.
+#' @return Lista com modelo e valores iniciais para a cadeia do Gibbs.
+fdlmInitQuant <- function(model, modelOut = TRUE) {
+    .Call('MScPack_fdlmInitQuant', PACKAGE = 'MScPack', model, modelOut)
+}
+
+#' Algoritmo de Gibbs para F-DLM com NA
+#' 
+#' Estima as quantidades do modelo dinamico fatorial de acordo com os resultados presentes na dissertacao.
+#' @param N tamanho final da amostra.
+#' @param brn periodo de aquecimento do algoritmo.
+#' @param thn espacamento entre as extracoes.
+#' @param model modelo F-DLM com valores da matriz de dados, de exogenas e hiperparametros da priori.
+#' @param initVal valores iniciais para Beta, Lambda e psi.
+#' @return Lista com modelo e valores simulados do Gibbs.
+fdlmGibbsNA <- function(N, brn, thn, model, initVal, progressBar = TRUE, onlyValues = FALSE) {
+    .Call('MScPack_fdlmGibbsNA', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
+}
+
+isNA <- function(x) {
+    .Call('MScPack_isNA', PACKAGE = 'MScPack', x)
+}
+
+cleanNA <- function(x) {
+    .Call('MScPack_cleanNA', PACKAGE = 'MScPack', x)
+}
+
+whichNA <- function(X) {
+    .Call('MScPack_whichNA', PACKAGE = 'MScPack', X)
+}
+
+changeNA <- function(X) {
+    .Call('MScPack_changeNA', PACKAGE = 'MScPack', X)
 }
 

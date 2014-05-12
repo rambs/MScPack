@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // fdlmGibbs
-Rcpp::List fdlmGibbs(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal);
-RcppExport SEXP MScPack_fdlmGibbs(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP) {
+Rcpp::List fdlmGibbs(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, bool progressBar, bool onlyValues);
+RcppExport SEXP MScPack_fdlmGibbs(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP, SEXP progressBarSEXP, SEXP onlyValuesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
@@ -18,7 +18,106 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< int >::type thn(thnSEXP );
         Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
         Rcpp::traits::input_parameter< Rcpp::List >::type initVal(initValSEXP );
-        Rcpp::List __result = fdlmGibbs(N, brn, thn, model, initVal);
+        Rcpp::traits::input_parameter< bool >::type progressBar(progressBarSEXP );
+        Rcpp::traits::input_parameter< bool >::type onlyValues(onlyValuesSEXP );
+        Rcpp::List __result = fdlmGibbs(N, brn, thn, model, initVal, progressBar, onlyValues);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmInitQuant
+Rcpp::List fdlmInitQuant(Rcpp::List model, bool modelOut = true);
+RcppExport SEXP MScPack_fdlmInitQuant(SEXP modelSEXP, SEXP modelOutSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
+        Rcpp::traits::input_parameter< bool >::type modelOut(modelOutSEXP );
+        Rcpp::List __result = fdlmInitQuant(model, modelOut);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmGibbsNA
+Rcpp::List fdlmGibbsNA(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, bool progressBar = true, bool onlyValues = false);
+RcppExport SEXP MScPack_fdlmGibbsNA(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP, SEXP progressBarSEXP, SEXP onlyValuesSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< int >::type N(NSEXP );
+        Rcpp::traits::input_parameter< int >::type brn(brnSEXP );
+        Rcpp::traits::input_parameter< int >::type thn(thnSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type initVal(initValSEXP );
+        Rcpp::traits::input_parameter< bool >::type progressBar(progressBarSEXP );
+        Rcpp::traits::input_parameter< bool >::type onlyValues(onlyValuesSEXP );
+        Rcpp::List __result = fdlmGibbsNA(N, brn, thn, model, initVal, progressBar, onlyValues);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// isNA
+LogicalVector isNA(NumericVector x);
+RcppExport SEXP MScPack_isNA(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP );
+        LogicalVector __result = isNA(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// cleanNA
+IntegerVector cleanNA(NumericVector x);
+RcppExport SEXP MScPack_cleanNA(SEXP xSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP );
+        IntegerVector __result = cleanNA(x);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// whichNA
+IntegerVector whichNA(arma::mat X);
+RcppExport SEXP MScPack_whichNA(SEXP XSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP );
+        IntegerVector __result = whichNA(X);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// changeNA
+Rcpp::List changeNA(arma::mat X);
+RcppExport SEXP MScPack_changeNA(SEXP XSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP );
+        Rcpp::List __result = changeNA(X);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
