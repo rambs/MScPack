@@ -6,9 +6,8 @@
 #include <RcppArmadillo.h>
 
 using namespace Rcpp;
-using namespace arma;
 
 //funcao para simular fatores
-mat FactorSim(mat Y, mat Lambda, vec psi);
+arma::mat FactorSim(arma::mat Y, arma::mat Lambda, arma::vec psi);
 
 #endif

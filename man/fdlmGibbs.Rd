@@ -3,7 +3,8 @@
 \alias{fdlmGibbs}
 \title{Algoritmo de Gibbs para F-DLM}
 \usage{
-fdlmGibbs(N, brn, thn, model, initVal, progressBar, onlyValues)
+fdlmGibbs(N, brn, thn, model, initVal, progressBar = TRUE,
+  onlyValues = FALSE)
 }
 \arguments{
 \item{N}{tamanho final da amostra.}

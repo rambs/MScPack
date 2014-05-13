@@ -1,10 +1,10 @@
 #include <RcppArmadillo.h>
-
 using namespace Rcpp;
 using namespace arma;
 // simulacao das variancias idiossincraticas
-vec psiSim(mat Y, mat Beta, mat b0, mat B0Inv, mat Lambda, mat L0, mat H0Inv, 
-            double n0, vec s0){
+//[[Rcpp::export(".psiSim")]]
+arma::vec psiSim(arma::mat Y, arma::mat Beta, arma::mat b0, arma::mat B0Inv, 
+arma::mat Lambda, arma::mat L0, arma::mat H0Inv, double n0, arma::vec s0){
   Environment stats("package:stats"); //chamando a função rgamma do "stats"
   Function rgammaR = stats["rgamma"];
   

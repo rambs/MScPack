@@ -5,10 +5,8 @@
 //[[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
-using namespace Rcpp;
-using namespace arma;
-
 //funcao para simular Lambda Matriz-Variada
-mat LambdaSimMV(mat Y, mat Factors, vec psi, mat L0H0Inv, mat H0Inv);
+arma::mat LambdaSimMV(arma::mat Y, arma::mat Factors, arma::vec psi, 
+arma::mat L0H0Inv, arma::mat H0Inv);
 
 #endif

@@ -1,21 +1,19 @@
 #include <RcppArmadillo.h>
-
-using namespace Rcpp;
 using namespace arma;
 //funcao para simular Lambda Matriz-Variada
-mat LambdaSimMV(mat Y, mat Factors, vec psi, mat L0H0Inv, mat H0Inv){
+//[[Rcpp::export(".LambdaSimMV")]]
+arma::mat LambdaSimMV(arma::mat Y, arma::mat Factors, arma::vec psi, 
+arma::mat L0H0Inv, arma::mat H0Inv){
   int q = Y.n_cols;
   int k = Factors.n_cols;
   
-  mat H1 = inv(Factors.t()*Factors + H0Inv);
-  mat L1 = (Y.t()*Factors + L0H0Inv)*H1;
-  //mat U, V;
-  //vec s;
-  //svd(U, s, V, H1, "standard");
-  mat Eigvec;
-  vec eigval;
-  eig_sym(eigval, Eigvec, H1);
-  mat ZHt = diagmat(sqrt(eigval))*Eigvec.t();
-  mat Lambda = L1 + diagmat(sqrt(psi))*randn(q, k)*ZHt;//diagmat(sqrt(s))*V;
+  arma::mat H1Inv = (Factors.t()*Factors + H0Inv);
+  arma::mat Eigvec;
+  arma::vec eigval;
+  eig_sym(eigval, Eigvec, H1Inv)
+  arma::mat L1 = (Y.t()*Factors + L0H0Inv)*Eigvec*diagmat(1/eigval)*Eigvec.t();
+  
+  arma::mat ZHt = diagmat(1/sqrt(eigval))*Eigvec.t();
+  arma::mat Lambda = L1 + diagmat(sqrt(psi))*randn(q, k)*ZHt;
   return Lambda;
 }

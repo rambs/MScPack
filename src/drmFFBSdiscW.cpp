@@ -1,6 +1,10 @@
-#include "drmFFBSdiscW.h"
+#include <RcppArmadillo.h>
+using namespace Rcpp;
+using namespace arma;
 // funcao FFBS para regressao com V constante e fator de desconto
-Rcpp::List drmFFBSdiscW(mat Y, mat X, mat dV, double discW, vec m0, mat ZC0){
+//[[Rcpp::export(".drmFFBSdiscW")]]
+Rcpp::List drmFFBSdiscW(arma::mat Y, arma::mat X, arma::mat dV, double discW, 
+arma::vec m0, arma::mat ZC0){
 int T = Y.n_rows; // ATENCAO: matriz de dados deve entrar T x q!!
 int q = Y.n_cols; 
 int r = q*X.n_cols; // ATENCAO: matriz de exogenas deve entrar sendo T x p
@@ -20,7 +24,7 @@ mat ee;
 mat FF;
 
 //para previsao, e' preciso armazenar W_{T+1}
-mat dVInv = inv(dV);
+mat dVInv = diagmat(1/dV.diag());
 
 //parametros para forma quadrada
 mat ZR;
@@ -47,13 +51,15 @@ for (int k = 1; k < (T+1); k++){
   QQ = symmatu(FF.t() * RR * FF + dV);
 
   //atualizacao
-  AA = RR * FF * inv(QQ);
-  ee = Yt.col(k-1) - ff;
-  
-  mm.col(k) = aa + AA*ee;
   L = ZR.t()*FF; //forma raiz quadrada
   eig_sym(eigval, Eigvec, L * dVInv * L.t());
   ZC.slice(k) = ZR * Eigvec * diagmat(1.0/sqrt(eigval + 1.0));
+  
+  //AA = RR * FF * inv(QQ); //p.104 West & Harrison (1997)
+  AA = ZC.slice(k)*(ZC.slice(k)).t()*FF*dVInv; //p.105 West & Harrison (1997)
+  ee = Yt.col(k-1) - ff;
+  
+  mm.col(k) = aa + AA*ee;
 }
 
 // BACKWARD SAMPLING

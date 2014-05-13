@@ -1,18 +1,22 @@
 #include <RcppArmadillo.h>
 
-using namespace Rcpp;
 using namespace arma;
 //funcao para simular fatores
-mat FactorSim(mat Y, mat Lambda, vec psi){
+//[[Rcpp::export(".FactorSim")]]
+arma::mat FactorSim(arma::mat Y, arma::mat Lambda, arma::vec psi){
   int k = Lambda.n_cols;
   int T = Y.n_rows;
-  mat G1 = inv(Lambda.t()*diagmat(1/psi)*Lambda + eye(k, k));
-  mat F1 = (Y*diagmat(1/psi)*Lambda)*G1;
+  //arma::mat G1 = inv(Lambda.t()*diagmat(1/psi)*Lambda + eye(k, k));
+  arma::mat Eigvec;
+  arma::vec eigval;
+  eig_sym(eigval, Eigvec, Lambda.t() * diagmat(1/psi) * Lambda);
   
-  mat UG, VG, svdG;
-  vec sG;
-  svd(UG, sG, VG, G1, "standard");
-  svdG = diagmat(sqrt(sG))*VG;
-  mat Factors = F1 + randn(T, k)*svdG;
+  arma::mat F1 = (Y*diagmat(1/psi)*Lambda)*Eigvec*diagmat(1/(eigval+1.0))*Eigvec.t();
+  
+  //arma::mat UG, VG, svdG;
+  //arma::vec sG;
+  //svd(UG, sG, VG, G1, "standard");
+  //svdG = diagmat(sqrt(sG))*VG;
+  arma::mat Factors = F1 + randn(T, k)*diagmat(1/sqrt(eigval+1.0))*Eigvec.t();
   return Factors;
 }
