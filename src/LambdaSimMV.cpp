@@ -10,7 +10,7 @@ arma::mat L0H0Inv, arma::mat H0Inv){
   arma::mat H1Inv = (Factors.t()*Factors + H0Inv);
   arma::mat Eigvec;
   arma::vec eigval;
-  eig_sym(eigval, Eigvec, H1Inv)
+  eig_sym(eigval, Eigvec, H1Inv);
   arma::mat L1 = (Y.t()*Factors + L0H0Inv)*Eigvec*diagmat(1/eigval)*Eigvec.t();
   
   arma::mat ZHt = diagmat(1/sqrt(eigval))*Eigvec.t();
