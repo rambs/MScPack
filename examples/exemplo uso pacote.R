@@ -38,8 +38,31 @@ str(mdfSim)
 str(modelo)
 init.val = list(Lambda = mdfSim$mod$Lambda, psi = as.matrix(mdfSim$mod$psi), Beta = mdfSim$mod$parmsFixReg)
 str(init.val)
+MScPack:::.drmFFBSdiscW(modelo$y, modelo$xDynReg, diag(as.vector(modelo$s0sq)), 0.95,
+                        modelo$m0, sqrt(modelo$C0))
+MScPack:::.LambdaSimMV(modelo$y, array(rnorm(TT*k), c(TT, k)), modelo$s0sq, modelo$L0,
+                       solve(modelo$H0))
+MScPack:::.FactorSim(modelo$y, modelo$L0, modelo$s0sq)
+MScPack:::.psiSim(modelo$y, modelo$b0, modelo$b0, solve(modelo$B0), modelo$L0, modelo$L0,
+                  solve(modelo$H0), modelo$n0, modelo$s0sq)
+                       
+MScPack:::.parmsFixRegSim(modelo$y, modelo$xFixReg, modelo$B0, sqrt(modelo$B0), 
+                          modelo$s0sq, solve(modelo$B0)%*%modelo$b0)
 
-mdfGibbs = fdlmGibbs(1000, 5000, 20, modelo, init.val)
+mdfGibbs = fdlmGibbs(1, 10000, 1, modelo, init.val)
+str(mdfGibbs)
+mdfGibbsOnly1 = fdlmGibbsOnly1(1, 10000, 1, modelo, init.val)
+mdfGibbs$gibbs$dur
+mdfGibbsOnly1$gibbs$dur
+plot(mdfGibbs$values$theta[1,,1], type = "l", ylim = range(mdfGibbs$values$theta))
+apply(mdfGibbs$values$theta[,,1], 1, points, type = "l")
+apply(mdfGibbsOnly1$values$theta[,,1], 1, points, type = "l", col = 2)
+
+par(mfrow = c(3,3), mar = c(2.1, 2.1, 0.1, 0.1))
+for(i in 1:9){
+  plot(mdfGibbs$values$Mu[,i,1], type = "l")
+  points(mdfGibbsOnly1$values$Mu[,i,1], type = "l", col = 2)
+}
 modeloNA = modelo
 modeloNA$y[c(50, 100, 150, 200, 250), 1:3] = NA
 modeloNA$y[c(80, 180, 280, 380, 480), 6:9] = NA

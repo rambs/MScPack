@@ -160,3 +160,20 @@ system.time(for(i in 1:1000){
   tmpa<-tmp(init.val)
 })
 str(tmpa)
+
+
+delta = 0.9
+
+TT = 5
+
+
+dvec = delta^(0:TT)
+exp(log(delta)*0:TT)
+D = array(0, c(6, 6))
+for(i in 0:TT){
+  D[(i+1):(TT+1),i+1] = dvec[1:(TT-i+1)] 
+}
+D
+
+upper.tri(D, T)
+?lower.tri
