@@ -6,7 +6,7 @@
 using namespace Rcpp;
 using namespace arma;
 
-#include "drmFFBSdiscW.h"
+#include "drmOnly1FFBSdiscW.h"
 #include "parmsFixRegSim.h"
 #include "LambdaSimMV.h"
 #include "FactorSim.h"
@@ -22,7 +22,7 @@ using namespace arma;
 //' @param initVal valores iniciais para Beta, Lambda e psi.
 //' @return Lista com modelo e valores simulados do Gibbs.
 // [[Rcpp::export]]
-Rcpp::List fdlmGibbs(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, 
+Rcpp::List fdlmGibbsOnly1(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, 
 bool progressBar = true, bool onlyValues = false)
 {
   Rcpp::Timer timer;
@@ -97,8 +97,6 @@ mat ZB1 = Eigvec*diagmat(sqrt(eigval));
 //svd(U, s, V, B1, "standard");
 //mat ZB1 = U*diagmat(sqrt(s));
 
-//std::cout << "\n rodou ate ZB1.\n";
-
 mat H0Inv = inv(HH0);
 mat L0H0Inv = LL0*H0Inv;
 
@@ -116,31 +114,31 @@ if (brn>0){
   for (j = 0; j < brn; j++){
   // simulacao dos estados
   E = Y - MFs - Fs*Ls.t();
-  thList = drmFFBSdiscW(E, xDyn, diagmat(ps), delta, mm0, ZC0);
+  thList = drmOnly1FFBSdiscW(E, xDyn, diagmat(ps), delta, mm0, ZC0);
   ths = as<arma::mat>(thList["th"]);
   MDs = as<arma::mat>(thList["Mu"]);
-  //std::cout << "\n rodou ate FFBS.\n";
+  
   // simulacao da reg estatica
   E = Y - MDs - Fs*Ls.t();
   Bs = parmsFixRegSim(E, xFix, B1, ZB1, ps, B0Invb0);
   MFs = xFix*Bs;
-  //std::cout << "\n rodou ate parmsFixRegSim.\n";
+  
   // simulacao dos fatores
   E = Y - MFs - MDs;
   Fs = FactorSim(E, Ls, ps);
-  //std::cout << "\n rodou ate FactorSim.\n";
+  
   // simulacao da matriz de cargas
   Ls = LambdaSimMV(E, Fs, ps, L0H0Inv, H0Inv);
-  //std::cout << "\n rodou ate LambdaSim.\n";
+  
   // simulacao das variancias idiossincraticas
   E = E - Fs*Ls.t();
   ps = psiSim(E, Bs, bb0, B0Inv, Ls, LL0, H0Inv, nn0, ss0);
-  //std::cout << "\n rodou ate psiSim.\n";
+  
   if(progressBar){
     it++;
     progress_bar(it, itTot);  
   }
-  //std::cout << "\n rodou ate primeiro 'for'.\n";
+  
   }
 } //fecha if (brn>0)
 
@@ -151,7 +149,7 @@ for (j=0; j<N; j++){
   for (i=0; i<thn; i++){
   // simulacao dos estados
   E = Y - MFs - Fs*Ls.t();
-  thList = drmFFBSdiscW(E, xDyn, diagmat(ps), delta, mm0, ZC0);
+  thList = drmOnly1FFBSdiscW(E, xDyn, diagmat(ps), delta, mm0, ZC0);
   ths = as<arma::mat>(thList["th"]);
   MDs = as<arma::mat>(thList["Mu"]);
   

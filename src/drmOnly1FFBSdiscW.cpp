@@ -27,21 +27,35 @@ mat dVInv = inv(dV);
 
 //parametros para forma quadrada
 mat ZR;
-cube ZC(r, r, T+1); //utilizado para fazer a amostragem retrospectiva
+mat ZC(r, r); //utilizado para fazer a amostragem retrospectiva
 
 //objetos para decomposicao em valores singulares e espectral
-mat U, V, L, Eigvec;
-vec s, eigval; 
+mat L, Eigvec;
+vec eigval; 
 
 double sqrtDiscW = sqrt(discW);
+double sqrt1mDiscW = sqrt(1-discW);
+
+//para evitar o loop da amostragem retrospectiva, recorri a uma propriedade
+//do FFBS com o uso do fator de desconto.
+//O que observei e' que 
+//th_{t-k} = (1-delta) \sum delta^j m_{t-k+j} + delta^k m_T + \sum delta^j e_{T-k+j}
+//IntegerVector seq0toT = seq_len(T+1)-1;
+//vec powDiscW = exp(log(discW)*as<NumericVector>(seq0toT));
+//mat Dmat(T+1, T+1); Dmat.zeros();
+
+//valores aleatorios gerados
+mat th = randn(r, T+1);
 
 mm.col(0) = m0;
-ZC.slice(0) = ZC0;
+ZC = ZC0;
+th.col(0) = sqrt1mDiscW*ZC*th.col(0);
+//Dmat.submat(0, 0, T, 0) = powDiscW.subvec(0, T);
 
 for (int k = 1; k < (T+1); k++){
   //evolucao
   aa = mm.col(k-1);
-  ZR = ZC.slice(k-1)/sqrtDiscW;
+  ZR = ZC/sqrtDiscW;
   RR = ZR * ZR.t();
   
   //predicao
@@ -50,37 +64,34 @@ for (int k = 1; k < (T+1); k++){
   QQ = symmatu(FF.t() * RR * FF + dV);
 
   //atualizacao
-  AA = RR * FF * diagmat(1.0/QQ.diag());
+  
+  L = ZR.t()*FF; //forma raiz quadrada
+  eig_sym(eigval, Eigvec, L * dVInv * L.t());
+  ZC = ZR * Eigvec * diagmat(1.0/sqrt(eigval + 1.0));
+
+  AA = ZC*ZC.t()*FF*dVInv; //p.105 West & Harrison (1997)
   ee = Yt.col(k-1) - ff;
   
   mm.col(k) = aa + AA*ee;
-  L = ZR.t()*FF; //forma raiz quadrada
-  eig_sym(eigval, Eigvec, L * dVInv * L.t());
-  ZC.slice(k) = ZR * Eigvec * diagmat(1.0/sqrt(eigval + 1.0));
+  
+  th.col(k) = sqrt1mDiscW*ZC*th.col(k);
+  mm.col(k-1) -= discW*mm.col(k-1); //mm agora representa mm*
+  //Dmat.submat(k, k, T, k) = powDiscW.subvec(0, T-k);
 }
 
 // BACKWARD SAMPLING
-
-//valores aleatorios gerados
-mat th = randn(r, T+1);
-
-//simulacao via forma raiz quadrada
-th.col(T) = mm.col(T) + ZC.slice(T) * th.col(T);
-
-double sqrt1mDiscW = sqrt(1-discW);
-mat hh;
-mat ZH;
+//simulacao dos estados sem loop
+/*
+th = (mm+th)*Dmat;
+rowvec oneP = ones(X.n_cols);
+mat Mu = kron(I_q, oneP) * (th.cols(1, T) % repmat(X.t(), q, 1));
+*/
 mat Mu(q, T);
-for (int k = 0; k < T; k++){
-  //inv(RR_t) = delta*inv(CC_{t-1}) 
-  //==> CC.slice(T-1-k) * RRinv.slice(T-k) = delta * I_n
-  //aa_t = mm_{t-1}
-  hh = (1-discW)*mm.col(T-1-k) + discW * th.col(T-k);
-  ZH = sqrt1mDiscW*ZC.slice(T-1-k); //forma raiz quadrada
-  th.col(T-1-k) = hh + ZH*th.col(T-1-k);
+th.col(T) += mm.col(T);
+for(int k = 0; k < T; k++){
+  th.col(T-1-k) += mm.col(T-1-k) + discW*th.col(T-k);
   Mu.col(T-1-k) = kron(I_q, X.row(T-1-k))*th.col(T-k);
 }
-
 return Rcpp::List::create(Named("th") = th, Named("Mu") = Mu.t(), 
-Named("ZW") = sqrt((1-discW)/discW)*ZC.slice(T));
+Named("ZW") = sqrt((1-discW)/discW)*ZC);
 }

@@ -34,6 +34,18 @@ fdlmGibbsNA <- function(N, brn, thn, model, initVal, progressBar = TRUE, onlyVal
     .Call('MScPack_fdlmGibbsNA', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
 }
 
+#' Algoritmo de Gibbs para F-DLM
+#' 
+#' Estima as quantidades do modelo dinamico fatorial de acordo com os resultados presentes na dissertacao.
+#' @param N tamanho final da amostra.
+#' @param brn periodo de aquecimento do algoritmo.
+#' @param model modelo F-DLM com valores da matriz de dados, de exogenas e hiperparametros da priori.
+#' @param initVal valores iniciais para Beta, Lambda e psi.
+#' @return Lista com modelo e valores simulados do Gibbs.
+fdlmGibbsOnly1 <- function(N, brn, thn, model, initVal, progressBar = TRUE, onlyValues = FALSE) {
+    .Call('MScPack_fdlmGibbsOnly1', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
+}
+
 #' Quantidades iniciais para Gibbs F-DLM
 #' 
 #' Calculo de quantidades inicias para evitar repeticao de operacoes identicas a cada iteracao do algoritmo de Gibbs..

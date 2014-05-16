@@ -24,7 +24,7 @@ mat ee;
 mat FF;
 
 //para previsao, e' preciso armazenar W_{T+1}
-mat dVInv = diagmat(1/dV.diag());
+mat dVInv = inv(dV);
 
 //parametros para forma quadrada
 mat ZR;
@@ -55,8 +55,8 @@ for (int k = 1; k < (T+1); k++){
   eig_sym(eigval, Eigvec, L * dVInv * L.t());
   ZC.slice(k) = ZR * Eigvec * diagmat(1.0/sqrt(eigval + 1.0));
   
-  //AA = RR * FF * inv(QQ); //p.104 West & Harrison (1997)
-  AA = ZC.slice(k)*(ZC.slice(k)).t()*FF*dVInv; //p.105 West & Harrison (1997)
+  AA = RR * FF * inv(QQ); //p.104 West & Harrison (1997)
+  //AA = ZC.slice(k)*(ZC.slice(k)).t()*FF*dVInv; //p.105 West & Harrison (1997)
   ee = Yt.col(k-1) - ff;
   
   mm.col(k) = aa + AA*ee;
