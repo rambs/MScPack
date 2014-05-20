@@ -1,0 +1,76 @@
+\documentclass{article}
+
+% caracteres do portugues e formatacao tb 
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+% inclusao de referencias externas
+\usepackage{hyperref}
+
+\title{Exemplo F-DLM com dados artificiais}
+\author{Rafael Barcellos}
+\date{\today}
+
+\begin{document}
+<<echo=FALSE, include=FALSE>>=
+thm <- knit_theme$get("fine_blue")
+knit_theme$set(thm)
+@
+\maketitle
+
+\begin{abstract}
+Este documento ilustra uma aplicação das funções que compõem o pacote \texttt{MScPack}. Todos os códigos do projeto se encontram em \href{https://github.com/rambs/MScPack}{github.com}
+\end{abstract}
+
+\section{Simulação dos dados artificiais}
+Para simularmos dados artificiais do modelo linear dinâmico fatorial (F-DLM), basta utilizar a função \texttt{mdfDiscW.sim}. O código abaixo simula $T = 500$ observações de $q = 9$ variáveis.
+<<simExog, fig.cap='Exogenas geradas artificialmente', highlight=FALSE>>=
+TT = 500
+set.seed(293874)
+xDyn = 3 + cumsum(rnorm(TT, 0, 0.05))
+plot(xDyn, type = "l")
+@
+
+<<defParms>>=
+xFix = rep(1, TT)
+parmsFix = -c(0.8, 0.92, 1.01, 1.1, 0.79, 0.98, 0.94, 1.07, 0.77)
+q = length(parmsFix)
+m0 = rep(1, q)
+C0 = diag(0.01, q)
+k = 3
+Lambda.lim = 0.1
+set.seed(1928)
+Lambda = array(runif(q*k, 0, Lambda.lim), c(q, k))
+Lambda[upper.tri(Lambda)] = 0
+diag(Lambda) = c(0.99, 0.95, 0.9)*Lambda.lim
+psi = c(0.02, 0.19, 0.36, 0.02, 0.02, 0.19, 0.19, 0.36, 0.36) * 
+  Lambda.lim/10
+comunal = diag(tcrossprod(Lambda))
+comunal/(comunal+psi)
+@
+
+
+<<simData,fig.cap='F-DLM - Dados artificiais'>>=
+library(MScPack)
+mdfSim = mdfDiscW.sim(xFix, array(parmsFix, c(1, q)), xDyn, m0, C0, 
+                      0.95, Lambda, psi, 90165)
+par(mfrow = c(3, 3), mar = c(2.1, 2.1, 0.1, 0.1))
+invisible(apply(mdfSim$y, 2, plot, type = "l", bty = "l"))
+@
+
+<<>>=
+modelo = list(y = mdfSim$y, xFixReg = mdfSim$mod$xFixReg, 
+              xDynReg = mdfSim$mod$xDynReg,
+              nFactors = ncol(mdfSim$mod$Lambda), 
+              L0 = array(0, dim(mdfSim$mod$Lambda)), 
+              H0 = diag(1e2, ncol(mdfSim$mod$Lambda)),
+              m0 = as.matrix(mdfSim$mod$m0), C0 = mdfSim$mod$C0,
+              b0 = array(0, dim(mdfSim$mod$parmsFixReg)), 
+              B0 = diag(1e3, nrow(mdfSim$mod$parmsFixReg)),
+              n0 = 1, s0sq = array(mdfSim$mod$psi, c(ncol(mdfSim$y), 1)),
+              discW = mdfSim$mod$discW)
+init.val = list(Lambda = mdfSim$mod$Lambda, 
+                psi = as.matrix(mdfSim$mod$psi), 
+                Beta = mdfSim$mod$parmsFixReg)
+@
+\end{document}

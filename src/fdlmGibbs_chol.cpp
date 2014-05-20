@@ -1,0 +1,252 @@
+
+//[[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
+#include <Rcpp/Benchmark/Timer.h>
+
+using namespace Rcpp;
+using namespace arma;
+
+#include "drmFFBSdiscW_chol.h"
+#include "parmsFixRegSim.h"
+#include "LambdaSimMV.h"
+#include "FactorSim.h"
+#include "psiSim.h"
+#include "progress_bar.h"
+
+//' Algoritmo de Gibbs para F-DLM (Choleski)
+//' 
+//' Estima as quantidades do modelo dinamico fatorial de acordo com os resultados presentes na dissertacao.
+//' @param N tamanho final da amostra.
+//' @param brn periodo de aquecimento do algoritmo.
+//' @param thn espacamento entre as extracoes.
+//' @param model modelo F-DLM com valores da matriz de dados, de exogenas e hiperparametros da priori.
+//' @param initVal valores iniciais para Beta, Lambda e psi.
+//' @return Lista com modelo e valores simulados do Gibbs.
+// [[Rcpp::export]]
+Rcpp::List fdlmGibbs_chol(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, 
+bool progressBar = true, bool onlyValues = false)
+{
+  Rcpp::Timer timer;
+  // leitura dos argumentos da funcao
+  mat Y = as<arma::mat>(model["y"]);
+  
+  mat xFix = as<arma::mat>(model["xFixReg"]); //exogenas reg estatica
+  mat xDyn = as<arma::mat>(model["xDynReg"]); //exogenas reg dinamica
+  
+  int k = as<int>(model["nFactors"]);
+  
+  mat LL0 = as<arma::mat>(model["L0"]);//hiperparametros de Lambda
+  mat HH0 = as<arma::mat>(model["H0"]);
+  
+  vec mm0 = as<arma::vec>(model["m0"]);//hiperparametros de Theta
+  mat CC0 = as<arma::mat>(model["C0"]);
+  
+  mat bb0 = as<arma::mat>(model["b0"]);//hiperparametros da reg estatica
+  mat BB0 = as<arma::mat>(model["B0"]);
+  
+  double nn0 = as<double>(model["n0"]);//hiperparametros da variancia idiossincratica
+  vec ss0 = as<arma::vec>(model["s0sq"]);
+  
+  double delta = as<double>(model["discW"]); //fator de desconto
+  
+  int q = Y.n_cols; // matriz de dados deve entrar tempo x variavel
+  int T = Y.n_rows;
+  int pFix = xFix.n_cols;
+  int pDyn = xDyn.n_cols;
+  int rDyn = pDyn*q;
+  
+  //tratamento de missings
+  NumericVector y(Y.begin(), Y.end());//vetorizacao da matriz de dados
+  int ysize = y.size();
+  IntegerVector yseq = seq_len(ysize)-1;
+  IntegerVector yNA = yseq[is_na(y)];
+  uvec uyNA = as<arma::uvec>(yNA);
+    
+  // Algoritmo de Gibbs
+  mat Ys(T, q);//objeto para lidar com missings
+  vec ys(yNA.size());
+  
+  mat ths(rDyn, T+1);
+  mat MDs(T, q); //media dinamica
+  mat Ls(q, k);
+  mat Fs(T, k); 
+  vec ps(q);
+  mat psMat(T, q); //matriz de var. idiossincraticas para simulacao dos dados faltantes
+  mat Bs(pFix, q);
+  mat MFs(T, q); //media fixa
+  mat ZWs(rDyn, rDyn);
+  mat Ms;
+
+  // Pontos iniciais da cadeia
+  Ys = Y;
+  if(yNA.size()>0){
+    NumericVector ysInit(yNA.size(), 0.0);
+    Ys.elem(uyNA) = as<arma::vec>(ysInit);
+    }
+    
+  Ls = as<arma::mat>(initVal["Lambda"]);
+  Fs.zeros();
+  ps = as<arma::vec>(initVal["psi"]);
+  Bs = as<arma::mat>(initVal["Beta"]);
+  MFs = xFix*Bs;
+  MDs.zeros();
+
+  // Amostras finais
+  cube theta(rDyn, T+1, N);
+  cube Lambda(q, k, N);
+  cube Factors(T, k, N);
+  mat psi(N, q);
+  cube Beta(pFix, q, N);
+  cube ZW(rDyn, rDyn, N);
+  cube MuDyn(T, q, N);
+  cube MuFix(T, q, N);
+  cube Mu(T, q, N);
+  mat Y_NA;
+  if(yNA.size()>0){
+    Y_NA.resize(N, yNA.size());
+    } /*else {
+      SEXP Y_NA = R_NilValue;
+      }*/
+
+  //decomposicao de CC
+  arma::mat rootCC0 = arma::trimatu(arma::chol(arma::symmatu(CC0)));
+  arma::mat C0Inv = arma::trans(arma::inv(rootCC0));
+  C0Inv = C0Inv.t() * C0Inv;
+  
+  mat B0Inv = arma::inv_sympd(arma::symmatu(BB0));
+  mat B0Invb0 = B0Inv*bb0;
+  arma::mat ZB1 = arma::inv(arma::trimatu(arma::chol(
+    arma::symmatu(xFix.t()*xFix + B0Inv))));
+  arma::mat B1 = ZB1 * ZB1.t();
+  
+  mat H0Inv = arma::inv_sympd(arma::symmatu(HH0));
+  mat L0H0Inv = LL0*H0Inv;
+  
+  // iterador da barra de progresso
+  int it = 0;
+  int itTot = brn + thn*N;
+  
+  mat E; //matriz que recebe valores corrigidos a media condicional completa
+  Rcpp::List thList;
+  
+  int i, j;
+  //burn-in
+  if (brn>0){
+    for (j = 0; j < brn; j++){
+    // simulacao dos estados
+    E = Ys - MFs - Fs*Ls.t();
+    thList = drmFFBSdiscW_chol(E, xDyn, diagmat(ps), delta, mm0, rootCC0, C0Inv);
+    ths = as<arma::mat>(thList["th"]);
+    MDs = as<arma::mat>(thList["Mu"]);
+  
+    // simulacao da reg estatica
+    E = Ys - MDs - Fs*Ls.t();
+    Bs = parmsFixRegSim(E, xFix, B1, ZB1, ps, B0Invb0);
+    MFs = xFix*Bs;
+  
+    // simulacao dos fatores
+    E = Ys - MFs - MDs;
+    Fs = FactorSim(E, Ls, ps);
+  
+    // simulacao da matriz de cargas
+    Ls = LambdaSimMV(E, Fs, ps, L0H0Inv, H0Inv);
+  
+    // simulacao das variancias idiossincraticas
+    E = E - Fs*Ls.t();
+    ps = psiSim(E, Bs, bb0, B0Inv, Ls, LL0, H0Inv, nn0, ss0);
+  
+    //simulacao dos valores faltantes
+    if(yNA.size()>0){
+      Ms = MDs + MFs + Fs*Ls.t();
+      psMat = repmat(ps.t(), T, 1);//variancia idiossincratica constante
+      ys = Ms.elem(uyNA) + diagmat(sqrt(psMat.elem(uyNA)))*randn(yNA.size(), 1);
+      Ys.elem(uyNA) = ys;    
+    }
+  
+    if(progressBar){
+      it++;
+      progress_bar(it, itTot);  
+    }
+  
+  }
+} //fecha if (brn>0)
+
+
+// Gibbs
+if (thn<=0) thn = 1;
+for (j=0; j<N; j++){
+  for (i=0; i<thn; i++){
+    // simulacao dos estados
+    E = Ys - MFs - Fs*Ls.t();
+    thList = drmFFBSdiscW_chol(E, xDyn, diagmat(ps), delta, mm0, rootCC0, C0Inv);
+    ths = as<arma::mat>(thList["th"]);
+    MDs = as<arma::mat>(thList["Mu"]);
+  
+    // simulacao da reg estatica
+    E = Ys - MDs - Fs*Ls.t();
+    Bs = parmsFixRegSim(E, xFix, B1, ZB1, ps, B0Invb0);
+    MFs = xFix*Bs;
+  
+    // simulacao dos fatores
+    E = Ys - MFs - MDs;
+    Fs = FactorSim(E, Ls, ps);
+  
+    // simulacao da matriz de cargas
+    Ls = LambdaSimMV(E, Fs, ps, L0H0Inv, H0Inv);
+  
+    // simulacao das variancias idiossincraticas
+    E = E - Fs*Ls.t();
+    ps = psiSim(E, Bs, bb0, B0Inv, Ls, LL0, H0Inv, nn0, ss0);
+  
+    //simulacao dos valores faltantes
+    if(yNA.size()>0){
+      Ms = MDs + MFs + Fs*Ls.t();
+      psMat = repmat(ps.t(), T, 1);//variancia idiossincratica constante
+      ys = Ms.elem(uyNA) + diagmat(sqrt(psMat.elem(uyNA)))*randn(yNA.size(), 1);
+      Ys.elem(uyNA) = ys;    
+    }
+  
+    if(progressBar){
+      it++;
+      progress_bar(it, itTot);  
+    }  
+  }
+  theta.slice(j) = ths;
+  Beta.slice(j) = Bs;
+  Lambda.slice(j) = Ls;
+  Factors.slice(j) = Fs;
+  psi.row(j) = ps.t();
+  ZW.slice(j) = as<arma::mat>(thList["ZW"]);
+  MuDyn.slice(j) = MDs;
+  MuFix.slice(j) = MFs;
+  Mu.slice(j) = MFs + MDs;
+  if(yNA.size()>0){
+    Y_NA.row(j) = ys.t();  
+  }
+}
+
+timer.step("Time elapsed (in sec)");
+Rcpp::NumericVector duration(timer);
+duration[0] = duration[0]/1000000000;
+
+if(progressBar){
+  printf("\n Algoritmo concluido. \n");
+}
+
+Rcpp::List gibbs = Rcpp::List::create(Named("duration") = duration, Named("N") = N, Named("burn") = brn, 
+Named("thin") = thn);
+
+Rcpp::List values = Rcpp::List::create(Named("Y_NA") = Y_NA, Named("yNA") = yNA, 
+Named("theta") = theta, 
+Named("Beta") = Beta, Named("Lambda") = Lambda, Named("Factors") = Factors, 
+Named("psi") = psi, Named("ZW") = ZW, Named("MuFix") = MuFix, 
+Named("MuDyn") = MuDyn, Named("Mu") = Mu);
+
+if(onlyValues){
+  return values;
+} else{
+  return Rcpp::List::create(Named("model") = model, Named("gibbs") = gibbs, 
+  Named("values") = values);  
+}
+
+}

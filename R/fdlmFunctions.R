@@ -120,3 +120,153 @@ fdlmGibbsIter <- function(model){
       return(ival)
   }
 }
+
+#' Simula F-DLM
+#' 
+#' Funcao que simula dados de um modelo dinamico fatorial
+#' @param xFixReg matriz de delinameanto da regressao estatica;
+#' @param parmsFixReg matriz de parametros da regressao estatica;
+#' @param xDynReg matriz de delineamento da regressao dinamica;
+#' @param m0,C0 media e variancia \emph{a priori} dos estados;
+#' @param discW fator de desconto;
+#' @param Lambda matriz de cargas fatoriais;
+#' @param psi vetor de variancias idiossincraticas;
+#' @param seed semente do gerador aleatorio.
+#' @return Lista com os parametros de entrada, os parametros simulados e os dados artificiais.
+mdfDiscW.sim <- function(xFixReg, parmsFixReg, xDynReg, m0, C0,
+                         discW = 0.95, Lambda, psi, seed = as.numeric(Sys.time()))
+{  
+  if(!is.null(xFixReg))
+    xFixReg = as.matrix(xFixReg) #matriz de exógenas T x pFix
+  
+  if(is.null(xFixReg) | length(xFixReg)==0)
+    stop("Modelo deve conter algum regressor estatico.")
+  
+  if(!is.null(xDynReg)){
+    xDynReg = as.matrix(xDynReg) #matriz de exógenas T x pDyn
+    if(nrow(xFixReg) != nrow(xDynReg))
+      stop("'xDynReg' deve conter mesmo número de linhas que 'xFixReg'.")
+    #removendo exogenas que equivalem a intercepto
+    is.xreg.intercept = apply(xDynReg, 2, function(x) all(x==x[1]))
+    xDynReg = xDynReg[, !is.xreg.intercept, drop = F]
+    if(any(is.xreg.intercept))
+      warning("Em 'xDynReg': removidas as exogenas que equivalem a intercepto.")
+  } 
+  
+  if(is.null(xDynReg) | length(xDynReg)==0)
+    stop("Modelo deve conter algum regressor dinamico")
+  
+  
+  #condicoes necessarias
+  if(ncol(parmsFixReg) != nrow(Lambda))
+    stop("'ncol(parmsFixReg)' deve ser igual a 'nrow(Lambda)'.")
+  
+  if(nrow(parmsFixReg) != ncol(xFixReg))
+    stop("'nrow(parmsFixReg)' deve ser igual a 'ncol(xFixReg)'.")
+  
+  if(length(psi) != nrow(Lambda))
+    stop("'length(psi)' deve ser igual a 'nrow(Lambda)'.")
+  
+  TT = nrow(as.matrix(xFixReg))
+  q = nrow(Lambda)
+  pFix = ncol(xFixReg)
+  pDyn = ncol(xDynReg)
+  k = ncol(Lambda)
+  
+  # geracao dos valores aleatorios
+  set.seed(seed)
+  h1 = TT*k
+  h2 = pDyn*q*(TT+1)
+  h3 = q*TT
+  normsim = rnorm(h1+h2+h3)
+  interval1 = 1:h1
+  interval2 = (h1+1):(h1+h2)
+  interval3 = (h1+h2+1):(h1+h2+h3)
+  
+  Factors = array(normsim[interval1], c(TT, k))
+  th = array(normsim[interval2], c(pDyn*q, TT+1))
+  E = diag(sqrt(psi)) %*% array(normsim[interval3], c(q, TT))
+  y = t(E)
+  #return(list(Factors = Factors, th = th, E = E))
+  
+  ZCsvd = svd(C0)
+  ZC = ZCsvd$u %*% diag(sqrt(ZCsvd$d))
+  
+  th[,1] = m0 + ZC %*% th[,1]
+  
+  mm = m0
+  for(i in 1:TT){
+    aa = mm
+    ZR = sqrt(1/discW)*ZC
+    RR = tcrossprod(ZR)
+    ZW = sqrt((1-discW)/discW)*ZC
+    th[,i+1] = th[,i] + ZW %*% th[,i+1]
+    muFix = t(parmsFixReg) %*% xFixReg[i,]
+    FF = kronecker(diag(1, q), xDynReg[i,])
+    muDyn = t(FF) %*% th[,i+1]
+    y[i,] =  muFix + muDyn + Lambda %*% Factors[i,] + E[,i]
+    ff = t(FF) %*% aa
+    QQ = t(FF) %*% RR %*% FF + diag(psi)
+    ee = y[i,] - muFix - Lambda %*% Factors[i,] - ff
+    AA = RR %*% FF %*% solve(QQ)
+    mm = aa + AA %*% ee
+    L = t(ZR) %*% FF
+    L.eig = eigen(L %*% diag((1/psi)) %*% t(L), symmetric = TRUE);
+    #cat(paste("\n", all.equal(diag(1, nrow(L)), L.eig$u %*% t(L.eig$v)), "\n"))
+    ZC = ZR %*% L.eig$vec %*% diag(1.0/sqrt(L.eig$val + 1.0));
+  }
+  mod = mget(names(formals(mdfDiscW.sim)))
+  return(list(mod = mod, y = y, th = th, Factors = Factors))
+}
+
+
+#' Matriz de cargas via WOP
+#' 
+#' Aplica metodo WOP para garantir unicidade da matriz de cargas.
+#' @param Lambda array oriundo do MCMC;
+#' @param max.iter maximo de iteracoes ate convergencia.
+#' @return Lista com matriz ortogonal \code{D} e cargas tendo aplicado o WOP.
+wop.fdlm <- function(Lambda, max.iter = 100){
+  q = dim(Lambda)[1]
+  k = dim(Lambda)[2]
+  N = dim(Lambda)[3]
+  Lambda.star = Lambda[,,N]
+  Lambda.0 = array(0, c(q, k))
+  it = 0
+  D = array(NA, c(k, k, N))
+  LambdaWOP = array(NA, c(q, k, N))
+  while(sum((Lambda.star-Lambda.0)^2)>1e-9){
+    Lambda.0 = Lambda.star
+    for (r in 1:N){
+      Sr = t(Lambda[,,r]) %*% Lambda.0
+      Sr.svd = svd(Sr)
+      D[,,r] = Sr.svd$u %*% t(Sr.svd$v)
+      LambdaWOP[,,r] = Lambda[,,r] %*% D[,,r]
+    }
+    Lambda.star = apply(LambdaWOP, c(1,2), mean)
+    it = it+1
+    if(it>max.iter)
+      break
+  }
+  return(list(LambdaWOP = LambdaWOP, D = D))  
+}
+
+#' Matriz de cargas via PLT
+#' 
+#' Aplica restricao PLT na matriz de cargas do MCMC.
+#' @param Lambda array com as simulacoes da matriz de cargas.
+#' @return Lista com array de cargas sujeitos a PLT e matriz ortogonal da restricao.
+plt.fdlm <- function(Lambda){
+  N = dim(Lambda)[3]
+  LambdaPLT = Lambda
+  k = dim(Lambda)[2]
+  Q.Lambda = array(NA, c(k, k, N))
+  for (r in 1:N){
+    qr.Lambda = qr(t(Lambda[,,r]))
+    LambdaPLT[,,r] = t(qr.R(qr.Lambda))
+    reflexion = diag(sign(diag(LambdaPLT[,,r])))
+    LambdaPLT[,,r] = LambdaPLT[,,r] %*% reflexion
+    Q.Lambda[,,r] = reflexion %*% t(qr.Q(qr.Lambda))
+  }
+  return(list(LambdaPLT = LambdaPLT, Q = Q.Lambda))
+}

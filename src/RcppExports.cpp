@@ -6,6 +6,25 @@
 
 using namespace Rcpp;
 
+// dmvnrm_arma_mc
+arma::vec dmvnrm_arma_mc(arma::mat x, arma::rowvec mean, arma::mat sigma, bool logd = false, int cores = 1);
+RcppExport SEXP MScPack_dmvnrm_arma_mc(SEXP xSEXP, SEXP meanSEXP, SEXP sigmaSEXP, SEXP logdSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP );
+        Rcpp::traits::input_parameter< arma::rowvec >::type mean(meanSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type sigma(sigmaSEXP );
+        Rcpp::traits::input_parameter< bool >::type logd(logdSEXP );
+        Rcpp::traits::input_parameter< int >::type cores(coresSEXP );
+        arma::vec __result = dmvnrm_arma_mc(x, mean, sigma, logd, cores);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // drmFFBSdiscW
 Rcpp::List drmFFBSdiscW(arma::mat Y, arma::mat X, arma::mat dV, double discW, arma::vec m0, arma::mat ZC0);
 RcppExport SEXP MScPack_drmFFBSdiscW(SEXP YSEXP, SEXP XSEXP, SEXP dVSEXP, SEXP discWSEXP, SEXP m0SEXP, SEXP ZC0SEXP) {
@@ -64,6 +83,27 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// fdlmGibbs_chol
+Rcpp::List fdlmGibbs_chol(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, bool progressBar = true, bool onlyValues = false);
+RcppExport SEXP MScPack_fdlmGibbs_chol(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP, SEXP progressBarSEXP, SEXP onlyValuesSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< int >::type N(NSEXP );
+        Rcpp::traits::input_parameter< int >::type brn(brnSEXP );
+        Rcpp::traits::input_parameter< int >::type thn(thnSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type initVal(initValSEXP );
+        Rcpp::traits::input_parameter< bool >::type progressBar(progressBarSEXP );
+        Rcpp::traits::input_parameter< bool >::type onlyValues(onlyValuesSEXP );
+        Rcpp::List __result = fdlmGibbs_chol(N, brn, thn, model, initVal, progressBar, onlyValues);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // fdlmGibbsNA
 Rcpp::List fdlmGibbsNA(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, bool progressBar = true, bool onlyValues = false);
 RcppExport SEXP MScPack_fdlmGibbsNA(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP, SEXP progressBarSEXP, SEXP onlyValuesSEXP) {
@@ -116,6 +156,108 @@ BEGIN_RCPP
         Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
         Rcpp::traits::input_parameter< bool >::type modelOut(modelOutSEXP );
         Rcpp::List __result = fdlmInitQuant(model, modelOut);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmLogLik
+arma::vec fdlmLogLik(arma::mat Y, arma::mat xFix, arma::mat xDyn, double nFactors, Rcpp::List hyperparms, arma::mat Y_NA, IntegerVector whichNA, NumericVector Beta, NumericVector Lambda, arma::mat psi, double discW);
+RcppExport SEXP MScPack_fdlmLogLik(SEXP YSEXP, SEXP xFixSEXP, SEXP xDynSEXP, SEXP nFactorsSEXP, SEXP hyperparmsSEXP, SEXP Y_NASEXP, SEXP whichNASEXP, SEXP BetaSEXP, SEXP LambdaSEXP, SEXP psiSEXP, SEXP discWSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xFix(xFixSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xDyn(xDynSEXP );
+        Rcpp::traits::input_parameter< double >::type nFactors(nFactorsSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type hyperparms(hyperparmsSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type Y_NA(Y_NASEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type whichNA(whichNASEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Beta(BetaSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type psi(psiSEXP );
+        Rcpp::traits::input_parameter< double >::type discW(discWSEXP );
+        arma::vec __result = fdlmLogLik(Y, xFix, xDyn, nFactors, hyperparms, Y_NA, whichNA, Beta, Lambda, psi, discW);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmLogLik_chol
+arma::vec fdlmLogLik_chol(arma::mat Y, arma::mat xFix, arma::mat xDyn, double nFactors, Rcpp::List hyperparms, arma::mat Y_NA, IntegerVector whichNA, NumericVector Beta, NumericVector Lambda, arma::mat psi, double discW);
+RcppExport SEXP MScPack_fdlmLogLik_chol(SEXP YSEXP, SEXP xFixSEXP, SEXP xDynSEXP, SEXP nFactorsSEXP, SEXP hyperparmsSEXP, SEXP Y_NASEXP, SEXP whichNASEXP, SEXP BetaSEXP, SEXP LambdaSEXP, SEXP psiSEXP, SEXP discWSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xFix(xFixSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xDyn(xDynSEXP );
+        Rcpp::traits::input_parameter< double >::type nFactors(nFactorsSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type hyperparms(hyperparmsSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type Y_NA(Y_NASEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type whichNA(whichNASEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Beta(BetaSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type psi(psiSEXP );
+        Rcpp::traits::input_parameter< double >::type discW(discWSEXP );
+        arma::vec __result = fdlmLogLik_chol(Y, xFix, xDyn, nFactors, hyperparms, Y_NA, whichNA, Beta, Lambda, psi, discW);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmLogLik_chol_mc
+arma::vec fdlmLogLik_chol_mc(arma::mat Y, arma::mat xFix, arma::mat xDyn, double nFactors, Rcpp::List hyperparms, arma::mat Y_NA, IntegerVector whichNA, NumericVector Beta, NumericVector Lambda, arma::mat psi, double discW, int cores);
+RcppExport SEXP MScPack_fdlmLogLik_chol_mc(SEXP YSEXP, SEXP xFixSEXP, SEXP xDynSEXP, SEXP nFactorsSEXP, SEXP hyperparmsSEXP, SEXP Y_NASEXP, SEXP whichNASEXP, SEXP BetaSEXP, SEXP LambdaSEXP, SEXP psiSEXP, SEXP discWSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xFix(xFixSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xDyn(xDynSEXP );
+        Rcpp::traits::input_parameter< double >::type nFactors(nFactorsSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type hyperparms(hyperparmsSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type Y_NA(Y_NASEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type whichNA(whichNASEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Beta(BetaSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type psi(psiSEXP );
+        Rcpp::traits::input_parameter< double >::type discW(discWSEXP );
+        Rcpp::traits::input_parameter< int >::type cores(coresSEXP );
+        arma::vec __result = fdlmLogLik_chol_mc(Y, xFix, xDyn, nFactors, hyperparms, Y_NA, whichNA, Beta, Lambda, psi, discW, cores);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// fdlmLogLik_mc
+arma::vec fdlmLogLik_mc(arma::mat Y, arma::mat xFix, arma::mat xDyn, double nFactors, Rcpp::List hyperparms, arma::mat Y_NA, IntegerVector whichNA, NumericVector Beta, NumericVector Lambda, arma::mat psi, double discW, int cores);
+RcppExport SEXP MScPack_fdlmLogLik_mc(SEXP YSEXP, SEXP xFixSEXP, SEXP xDynSEXP, SEXP nFactorsSEXP, SEXP hyperparmsSEXP, SEXP Y_NASEXP, SEXP whichNASEXP, SEXP BetaSEXP, SEXP LambdaSEXP, SEXP psiSEXP, SEXP discWSEXP, SEXP coresSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xFix(xFixSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type xDyn(xDynSEXP );
+        Rcpp::traits::input_parameter< double >::type nFactors(nFactorsSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type hyperparms(hyperparmsSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type Y_NA(Y_NASEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type whichNA(whichNASEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Beta(BetaSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type Lambda(LambdaSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type psi(psiSEXP );
+        Rcpp::traits::input_parameter< double >::type discW(discWSEXP );
+        Rcpp::traits::input_parameter< int >::type cores(coresSEXP );
+        arma::vec __result = fdlmLogLik_mc(Y, xFix, xDyn, nFactors, hyperparms, Y_NA, whichNA, Beta, Lambda, psi, discW, cores);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);

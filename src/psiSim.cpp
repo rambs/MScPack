@@ -12,7 +12,7 @@ arma::mat Lambda, arma::mat L0, arma::mat H0Inv, double n0, arma::vec s0){
   int q = Y.n_cols;
   int k = Lambda.n_cols;
   int p = Beta.n_rows;
-  vec Spsi = sum(pow(Y, 2)).t() + trace((Beta-b0).t()*B0Inv*(Beta-b0)) + 
+  vec Spsi = sum(Y%Y).t() + trace((Beta-b0).t()*B0Inv*(Beta-b0)) + 
                 trace((Lambda-L0)*H0Inv*(Lambda-L0).t());
   double n1 = n0 + T + k + p;
   vec n1s1 = (Spsi + n0*s0);
