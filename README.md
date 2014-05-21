@@ -1,8 +1,18 @@
 README
 ========================================================
 
-***2014-05-19***
+2014-05-20
+---
+Passos dados:
+- Relatório de aplicação a dados simulados concluído. As funções estão funcionando corretamente e há convergência das cadeias, embora demore um pouco se o ponto de partida for muito distante do verdadeiro parâmetro. FFBS usando Choleski é mais rápido.
 
+Passos futuros:
+- Escrever relatório de aplicação a dados reais e observar comportamento das cadeias. Fazer comparação de modelos utilizando fator de Bayes;
+- Incoporar SV aos modelos dinâmicos;
+- Programar função para modelo fatorial dinâmico e DFSVM (modelo fatorial dinâmico de volatilidade estocástica).
+
+2014-05-19
+---
 Passos dados:
 - Algoritmo de Gibbs implementado utilizando fatoração de Choleski para a geração dos vetores aleatórios normais no FFBS e também para a inversão de matrizes. Com essa abordagem houve ganho de 25% no tempo computacional para dados artificiais com $T = 500$ e $q = 9$.
 
@@ -11,13 +21,13 @@ Passos futuros:
 - Incorporar SV aos modelos dinâmicos fatoriais;
 - Programar modelo fatorial dinâmico.
 
-***2014-05-18***
-
+2014-05-18
+---
 Passos dados:
  - Cálculo da verosimilhança marginal, tendo integrado analiticamente tanto os fatores quanto os parâmetros de estado. Ponto a observar: a verossimilhança utilizando fatoração de Choleski antes da inversão parece ser mais eficiente do que a decomposição espectral (autovalores).
  
-***2014-05-15***
-
+2014-05-15
+---
 Passos dados:
   - tentativa de acelerar o MCMC via remocao do loop. Resultado: nao houve ganho computacional. Ao contrario, aumentou-se o tempo computacional.
 

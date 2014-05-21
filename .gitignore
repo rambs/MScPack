@@ -7,12 +7,12 @@ src/*.dll
 ###
 # ignoring TeX files
 ###
-.tex
-.aux
-.log
+*.tex
+*.aux
+*.log
 
 ###
 # ignoring HTML and Rmd files
 ###
-.html
-.Rmd
+*.html
+*.Rmd
