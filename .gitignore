@@ -4,3 +4,15 @@
 src/*.o
 src/*.so
 src/*.dll
+###
+# ignoring TeX files
+###
+.tex
+.aux
+.log
+
+###
+# ignoring HTML and Rmd files
+###
+.html
+.Rmd
