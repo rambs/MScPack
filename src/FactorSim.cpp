@@ -6,7 +6,7 @@ using namespace arma;
 arma::mat FactorSim(arma::mat Y, arma::mat Lambda, arma::vec psi){
   int k = Lambda.n_cols;
   int T = Y.n_rows;
-  arma::mat G1 = inv(Lambda.t()*diagmat(1/psi)*Lambda + eye(k, k));
+  //arma::mat G1 = inv(Lambda.t()*diagmat(1/psi)*Lambda + eye(k, k));
   arma::mat G1Inv = Lambda.t()*diagmat(1/psi)*Lambda + eye(k, k);
   arma::mat rootG1 = arma::trans(arma::inv(arma::trimatu(arma::chol(G1Inv)))); 
   //arma::mat Eigvec;

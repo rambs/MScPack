@@ -41,6 +41,7 @@ arma::mat th = randn(r, T+1);
 
 mm.col(0) = m0;
 rootCC = C0_chol;
+CC = rootCC.t() * rootCC; // faltava inicializacao de CC. 
 CCInv = C0Inv;
 th.col(0) = sqrt1mDiscW * rootCC.t() * th.col(0);
 
