@@ -386,3 +386,24 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// RunFdlmIntGibbs
+Rcpp::List RunFdlmIntGibbs(int N, int brn, int thn, Rcpp::List model, Rcpp::List initVal, bool progressBar = true, bool onlyValues = false);
+RcppExport SEXP MScPack_RunFdlmIntGibbs(SEXP NSEXP, SEXP brnSEXP, SEXP thnSEXP, SEXP modelSEXP, SEXP initValSEXP, SEXP progressBarSEXP, SEXP onlyValuesSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< int >::type N(NSEXP );
+        Rcpp::traits::input_parameter< int >::type brn(brnSEXP );
+        Rcpp::traits::input_parameter< int >::type thn(thnSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type model(modelSEXP );
+        Rcpp::traits::input_parameter< Rcpp::List >::type initVal(initValSEXP );
+        Rcpp::traits::input_parameter< bool >::type progressBar(progressBarSEXP );
+        Rcpp::traits::input_parameter< bool >::type onlyValues(onlyValuesSEXP );
+        Rcpp::List __result = RunFdlmIntGibbs(N, brn, thn, model, initVal, progressBar, onlyValues);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

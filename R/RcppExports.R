@@ -116,3 +116,18 @@ changeNA <- function(X) {
     .Call('MScPack_psiSim', PACKAGE = 'MScPack', Y, Beta, b0, B0Inv, Lambda, L0, H0Inv, n0, s0)
 }
 
+#' Amostrador de Gibbs para F-DRM com intercepto
+#' 
+#' Roda o amostrador de Gibbs para F-DRM onde o intercepto
+#'  e os parametros de estados sao amostrados conjuntamente.
+#' @param N tamanho final da amostra.
+#' @param brn periodo de aquecimento do algoritmo.
+#' @param thn espacamento entre as extracoes.
+#' @param model modelo F-DLM com valores da matriz de dados,
+#'  de exogenas e hiperparametros da priori.
+#' @param initVal valores iniciais para Beta, Lambda e psi.
+#' @return Lista com modelo e valores simulados do Gibbs.
+RunFdlmIntGibbs <- function(N, brn, thn, model, initVal, progressBar = TRUE, onlyValues = FALSE) {
+    .Call('MScPack_RunFdlmIntGibbs', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
+}
+
