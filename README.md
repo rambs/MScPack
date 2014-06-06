@@ -1,6 +1,18 @@
 README
 ========================================================
 
+2014-06-05
+---
+Passos dados:
+- Funções `SampleDynFactors` e `SampleVarParms` criadas e validadas via simulação. Talvez ainda seja necessário rever o código da amostragem da distribuição *a posteriori* dos parâmetros do VAR. Parece que está um pouco frágil a estimação, mas pode ser uma dificuldade intrínseca do modelo.
+- Abordagem WOP para matriz de cargas no DFM iniciada. Acabei não conseguindo terminar o código a tempo da reunião com a Alexandra ocorrida hoje. A questão é como otimizar a funçao de perda definida como soma de duas parcelas. A primeira parcela se refere ao WOP (bastante semelhante ao caso estático), enquanto a segunda se refere à perda quando aos parâmetros do VAR, que sofrem alteração devida à rotação dos fatores.
+
+Passos futuros:
+- Avançar no código para o WOP no caso dinâmico;
+- Incluir SV aos modelos;
+- Simulação das variâncias idiossincráticas seguindo SV sera feita utilizando a abordagem de Kastner e Frühwirth-Schnatter (2013), que é bastante eficiente para modelos univariados (caso em que cairemos);
+- Construir funções que calculam a verossimilhança marginal para cada modelo. Ganha-se eficiência quanto mais integrais forem resolvidas analiticamente. Para isso, é interessante construir um filtro progressivo que possibilite integração dos parâmetros de estado e dos fatores estáticos.
+
 2014-05-20
 ---
 Passos dados:

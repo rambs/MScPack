@@ -2,7 +2,7 @@
  * MScPack
  * Description: Sampling dynamic factors with variance being identity
  * Author: Rafael Barcellos
- * Last update May 5th, 2014
+ * Last updated 3 June 2014
  * R 3.0.2
  */
  
@@ -12,8 +12,9 @@ using namespace Rcpp;
 using namespace arma;
 
 // It's important to note that the prior distribution of every factor before t = 1
-// was chosen so as to avoid the use of Metropolis step within the Gibbs sampler.
-// The simplest way to do that is to consider those factors equal to zero.
+//  was chosen so as to avoid the use of Metropolis step within the Gibbs sampler.
+// A simple way to do that is to consider those factors following a normal
+//  distribution with mean zero and variance equals to identity.
 
 // [[Rcpp::export]]
 arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
@@ -65,7 +66,7 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     
     // definition of prior hyperparms
     m.zeros();
-    C.slice(0) = eye(r, r);
+    C.slice(0) = 1e2*eye(r, r);
     
     // forward filter
     // the filter is done considering the factorisation in square root form.
@@ -109,8 +110,9 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     std::reverse(colOrder.begin(), colOrder.end());//it must be checked if this works fine
     //std::reverse checked in MScPackExamples/examples/rcppRev.R and worked ok.
     
-    arma::mat factors(k, T); //factors before t=1 are set to zero
-    factors.cols(T-h, T-1) = phiMat.cols(as<arma::uvec>(colOrder));
+    // since the factos before t=1 are N(0,I), they must be sampled backward
+    arma::mat factors(k, T+h); 
+    factors.cols(T, T+h-1) = phiMat.cols(as<arma::uvec>(colOrder));
     
     arma::mat C_t, C11, C22, C12, InvC11, C1, InvC1, rootInvHStar, rootHStar;
     arma::vec m1, m2, hStar;
@@ -124,21 +126,21 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     }
     
     if (r == k){
-      for (int t = T-1; t >= h; t--){
+      for (int t = T-1; t >= 0; t--){
         C1 = C.slice(t);
         m1 = m.col(t);
         
         InvC1 = arma::inv(arma::symmatu(C1));
         rootInvHStar = arma::chol(arma::symmatu(InvC1 + PhiH.t() * PhiH));
         rootHStar = arma::trans(arma::inv(arma::trimatu(rootInvHStar)));
-        m2 = factors.col(t-h+1);
+        m2 = factors.col(t+1);
         hStar = rootHStar.t() * rootHStar * (InvC1 * m1 + PhiH.t() * m2);
-        factors.col(t-h) = hStar + rootHStar.t() * randn<vec>(k);
+        factors.col(t) = hStar + rootHStar.t() * randn<vec>(k);
       }
     }
     
     if (r > k){
-      for (int t = T-1; t >= h; t--){
+      for (int t = T-1; t >= 0; t--){
         C_t = C.slice(t);
         C11 = C_t.submat(0, 0, r-k-1, r-k-1);
         C22 = C_t.submat(r-k, r-k, r-1, r-1);
@@ -156,9 +158,9 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
         rootHStar = arma::trans(arma::inv(arma::trimatu(rootInvHStar)));      
         hStar = rootHStar.t() * rootHStar * (InvC1 * m1 + PhiH.t() * m2);
         
-        factors.col(t-h) = hStar + rootHStar.t() * randn<vec>(k);
+        factors.col(t) = hStar + rootHStar.t() * randn<vec>(k);
         
-        phi = arma::join_cols(phi.subvec(k, r-1), factors.col(t-h));
+        phi = arma::join_cols(phi.subvec(k, r-1), factors.col(t));
       }
     }
     return factors;
