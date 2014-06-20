@@ -34,7 +34,9 @@ arma::mat SampleDfmLoads(arma::mat y, arma::mat factors, arma::vec psi,
   int TpH = factors.n_rows;
   int h = TpH - T;
   if (h < s+1){
-    throw std::range_error("Argument 's' greater than or equal to factors' VAR order in SampleDfmLoads.cpp");
+    throw std::range_error(
+      "Argument 's' greater than or equal to factors' VAR order in SampleDfmLoads.cpp"
+      );
   }
   arma::mat I_q = eye(q, q);
 //  std::cout << "\nh = " << h << "\n";

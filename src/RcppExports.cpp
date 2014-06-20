@@ -407,3 +407,57 @@ BEGIN_RCPP
     return __sexp_result;
 END_RCPP
 }
+// SampleDfmLoads
+arma::mat SampleDfmLoads(arma::mat y, arma::mat factors, arma::vec psi, int s, double c0);
+RcppExport SEXP MScPack_SampleDfmLoads(SEXP ySEXP, SEXP factorsSEXP, SEXP psiSEXP, SEXP sSEXP, SEXP c0SEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type factors(factorsSEXP );
+        Rcpp::traits::input_parameter< arma::vec >::type psi(psiSEXP );
+        Rcpp::traits::input_parameter< int >::type s(sSEXP );
+        Rcpp::traits::input_parameter< double >::type c0(c0SEXP );
+        arma::mat __result = SampleDfmLoads(y, factors, psi, s, c0);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// SampleDynFactors
+arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar, arma::vec psi);
+RcppExport SEXP MScPack_SampleDynFactors(SEXP YSEXP, SEXP LambdaBarSEXP, SEXP PhiBarSEXP, SEXP psiSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type LambdaBar(LambdaBarSEXP );
+        Rcpp::traits::input_parameter< arma::mat >::type PhiBar(PhiBarSEXP );
+        Rcpp::traits::input_parameter< arma::vec >::type psi(psiSEXP );
+        arma::mat __result = SampleDynFactors(Y, LambdaBar, PhiBar, psi);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
+// SampleVarParms
+arma::mat SampleVarParms(arma::mat Y, int h, double c0);
+RcppExport SEXP MScPack_SampleVarParms(SEXP YSEXP, SEXP hSEXP, SEXP c0SEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP );
+        Rcpp::traits::input_parameter< int >::type h(hSEXP );
+        Rcpp::traits::input_parameter< double >::type c0(c0SEXP );
+        arma::mat __result = SampleVarParms(Y, h, c0);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}

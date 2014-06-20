@@ -131,3 +131,15 @@ RunFdlmIntGibbs <- function(N, brn, thn, model, initVal, progressBar = TRUE, onl
     .Call('MScPack_RunFdlmIntGibbs', PACKAGE = 'MScPack', N, brn, thn, model, initVal, progressBar, onlyValues)
 }
 
+SampleDfmLoads <- function(y, factors, psi, s, c0) {
+    .Call('MScPack_SampleDfmLoads', PACKAGE = 'MScPack', y, factors, psi, s, c0)
+}
+
+SampleDynFactors <- function(Y, LambdaBar, PhiBar, psi) {
+    .Call('MScPack_SampleDynFactors', PACKAGE = 'MScPack', Y, LambdaBar, PhiBar, psi)
+}
+
+SampleVarParms <- function(Y, h, c0) {
+    .Call('MScPack_SampleVarParms', PACKAGE = 'MScPack', Y, h, c0)
+}
+
