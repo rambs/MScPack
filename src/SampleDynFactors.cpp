@@ -32,7 +32,7 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     if (h == s+1){
       FLambda = LambdaBar;
     } else {
-      FLambda = arma::join_rows(LambdaBar, zeros(q, h-s-1));
+      FLambda = arma::join_rows(LambdaBar, zeros(q, k*(h-s-1)));
     }
     
     // definition of GPhi

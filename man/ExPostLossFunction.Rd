@@ -21,19 +21,20 @@ minimization.}
 }
 \value{
 Quadratic loss and, as an attribute, the best sign of the orthogonal
-matrix.
+  matrix.
 }
 \description{
 This function returns the quadratic loss function
-of an orthogonal transformation of the loadings and the VAR parameters
-in a DFM (\emph{dynamic factor model}).
+  of an orthogonal transformation of the loadings and the VAR parameters
+  in a DFM (\emph{dynamic factor model}).
 }
 \details{
 The arguments \code{Lambda} and \code{LambdaStar} must be
-a row binding of all loadings matrices. For example, suppose we have
-\eqn{s = 2}. In this case, we have three matrices of loadings which are
-\eqn{\Lambda_0}{\Lambda[0]}, \eqn{\Lambda_1}{\Lambda[1]} and
-\eqn{\Lambda_2}{\Lambda[2]}. So, \code{Lambda} is equal to
-\eqn{(\Lambda_0, \Lambda_1', \Lambda_2')'}{(\Lambda[0]^T,\Lambda[1]^T,\Lambda[2]^T)^T}.
+  a row binding of all loadings matrices. For example, suppose we have
+  \eqn{s = 2}. In this case, we have three matrices of loadings which are
+  \eqn{\Lambda_0}{\Lambda[0]}, \eqn{\Lambda_1}{\Lambda[1]} and
+  \eqn{\Lambda_2}{\Lambda[2]}. So, \code{Lambda} is equal to
+  \eqn{(\Lambda_0, \Lambda_1', \Lambda_2')'}{
+  (\Lambda[0]^T,\Lambda[1]^T,\Lambda[2]^T)^T}.
 }
 

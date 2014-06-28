@@ -12,11 +12,13 @@ BuildOrthMat(parms)
 Orthogonal matrix.
 }
 \description{
-Build orthogonal matrix from the formula 24 presented in Assmann et al. (2014).
+Build orthogonal matrix from the formula 24 presented in Assmann
+  et al. (2014).
 }
 \references{
-Assmann C, Boysen-Hogrefe J and Pape M (2014). "Bayesian Analysis of Dynamic Factor
-Models: An Ex-Post Approach towards the Rotation Problem." \emph{Technical Report 1902}, Kiel
-Institution for the World Economy.
+Assmann C, Boysen-Hogrefe J and Pape M (2014). "Bayesian
+  Analysis of Dynamic Factor Models: An Ex-Post Approach towards the
+  Rotation Problem." \emph{Technical Report 1902}, Kiel Institution
+  for the World Economy.
 }
 
