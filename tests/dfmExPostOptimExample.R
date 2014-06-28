@@ -1,7 +1,7 @@
 # MScPack
-# Description: DFM's Gibbs sampler and ex-post rotation
+# Description: DFM's Gibbs sampler and ex-post rotation example
 # Author: Rafael Barcellos
-# Last updated: 26th June, 2014
+# Last updated: 28th June, 2014
 # R 3.1.0
 
 # loading required packages -----------------------------------------------
@@ -23,18 +23,24 @@ burn <- 5e3
 LambdaBar.sim <- array(NA, c(q, k*(s+1), N))
 PhiBar.sim <- array(NA, c(k, k*h, N))
 factors.sim <- array(NA, c(k, TT+h, N))
+psi.sim <- array(NA, c(N, q))
 
 # working objects with initial values
 Ls <- array(0, c(q, k*(s+1)))
 diag(Ls) <- 1
 Ps <- array(0, c(k, k*h))
 fs <- array(0, c(k, TT+h))
+ps <- rep(1, q)
 
 # progress bar
 pb <- txtProgressBar(style = 3)
 it <- 0
 n.it <- burn + thin*N
 start.time <- Sys.time()
+
+#hyperparms for psi
+n0 <- 0.1
+s0 <- 1
 
 # gibbs sampler
 for (j in 1:N){
@@ -44,15 +50,28 @@ for (j in 1:N){
     max.count <- thin
   }
   for (i in 1:max.count){
-    fs <- SampleDynFactors(y, Ls, Ps, psi)
-    Ls <- SampleDfmLoads(y, t(fs), psi, s, 1e1)
+    fs <- SampleDynFactors(y, Ls, Ps, ps)
+    Ls <- SampleDfmLoads(y, t(fs), ps, s, 1e1)
     Ps <- SampleVarParms(t(fs), h = h, c0 = 1e3)
+    
+    #############################################
+    x <- NULL
+    for (i in 1:(s+1)){
+      x <- cbind(x, t(fs[, (h+2-i):(TT+h-i+1)]))
+    }
+    
+    n1s1 <- colSums((y - x %*% t(Ls))^2) + n0*s0
+    n1 <- TT + n0
+    ps <- 1/rgamma(q, n1/2, n1s1/2)
+    #############################################
+    
     it <- it + 1
     setTxtProgressBar(pb, it/n.it)
   }
   factors.sim[,, j] <- fs
   LambdaBar.sim[,, j] <- Ls
   PhiBar.sim[,, j] <- Ps
+  psi.sim[j, ] <- ps
 }
 end.time <- Sys.time()
 duration <- end.time - start.time
@@ -185,52 +204,7 @@ abline(h = 1)
 
 # quadratic loss optimization ---------------------------------------------
 
-# initial values
-Lstar <- LambdaBar.sim[,, N]
-dim(Lstar) <- c(q, k, s+1)
-Lstar <- do.call("rbind", lapply(1:(s+1), function(i) Lstar[,,i]))
-Pstar <- PhiBar.sim[,, N]
-
-LambdaD <- array(NA, c(dim(Lstar), N))
-Phi.rtd <- array(NA, dim(PhiBar.sim))
-D <- array(NA, c(ncol(Lstar), ncol(Lstar), N))
-
-it <-0
-tol <- 1e-10
-max.iter <- 10
-eps <- 1
-
-pb <- txtProgressBar(style = 3)
-
-while (eps > tol){
-  if (it >= max.iter){
-    break
-  }
-  Lstar0 <- Lstar
-  Pstar0 <- Pstar
-  for (j in 1:N){
-    Ls <- LambdaBar.sim[,, j]
-    dim(Ls) <- c(q, k, s+1)
-    Ls <- do.call("rbind", lapply(1:(s+1), function(i) Ls[,, i]))
-    Ps <- PhiBar.sim[,, j]
-    out.opt <- tmpExPostLossOptim(Ls, Lstar, Ps, Pstar)#, n.values = 0)
-    LambdaD[,, j]  <- out.opt$Lambda.opt
-    D[,, j] <- out.opt$D.opt
-    Phi.rtd[,, j] <- out.opt$Phi.opt
-    setTxtProgressBar(pb, j/N)
-  }
-  Lstar <- apply(LambdaD, c(1, 2), mean)
-  Pstar <- apply(Phi.rtd, c(1, 2), mean)
-  eps <- sum((Lstar-Lstar0)^2) + sum((Pstar-Pstar0)^2)
-  it <- it + 1
-  message(paste("Iteracao", it, "concluida."))
-}
-
-# testing optimisation function -------------------------------------------
-
-tmp <- RunDfmExPostOptAlg(LambdaBar.sim, PhiBar.sim)
-all.equal(tmp$Lambda, LambdaD)
-str(tmp)
+tmp <- RunDfmExPostOptAlg(LambdaBar.sim, PhiBar.sim, max.iter = 1)
 
 attach(tmp)
 
@@ -256,9 +230,9 @@ for (i in 1:nrow(LambdaS)){
 par(mfrow = dim(LambdaBar), mar = rep(0.1, 4))
 for (i in 1:nrow(LambdaS)){
   for (j in 1:ncol(LambdaS)){
-     hist(LambdaD[i, j, ], col = rgb(0, 0, 0.5, 0.3), breaks = 30, 
-          xlim = range(LambdaD), main = "", border = rgb(0,0,0.5,0.3))
-     par(new = T)
+    hist(LambdaD[i, j, ], col = rgb(0, 0, 0.5, 0.3), breaks = 30, 
+         xlim = range(LambdaD), main = "", border = rgb(0,0,0.5,0.3))
+    par(new = T)
     hist(tmp$Lambda[i, j, ], col = rgb(0, 0, 0.5, 0), breaks = 30, 
          xlim = range(tmp$Lambda), main = "", border = rgb(0,0,0,0.3))
     abline(v = LambdaS.opt[i, j], col = "red")
@@ -318,7 +292,7 @@ for (i in 1:(q*(s+1))){
   }
 }
 
-par(mfrow = c(q, k*(s+1)), mar = c(2.1, 2.1, 0.1, 0.1))
+
 lmat <- matrix(1:(k*(s+1)*q), ncol = k, byrow = T)
 lmat <- t(lmat)
 dim(lmat) <- c(k, q, (s+1))
@@ -361,19 +335,8 @@ for (i in 1:k){
     hist(Phi.sim.plt[i, j, ], col = "darkblue", breaks = 50, 
          border = rgb(0,0,0.5),
          main = "")#, #paste("PhiBar[", i, ",", j, "]", sep = ""),
-         #xlim = range(Phi.sim.plt))
+    #xlim = range(Phi.sim.plt))
     abline(v = Phi.plt[i, j], col = "red")
-  }
-}
-
-x <- Phi.sim.plt
-dim(x) <- c(k*k*h, N)
-x <- t(x)
-par(mfrow = c(11, 6),mar = rep(1.0, 4))
-for (i in 1:11){
-  for (j in (i+1):12){
-    plot(x[, i], x[, j], pch = 16, 
-         col = rgb(0, 0, 0.5, 0.2))
   }
 }
 
@@ -384,7 +347,6 @@ for (j in 1:N){
   factors.sim.opt[,, j] <- t(D[,, j]) %*% factors.sim[,, j]
 }
 
-dim(factors.sim.opt)
 par(mfrow = c(1, 1))
 plot(factors.sim.opt[1, 1, ], type = "l")
 plot(factors.sim.opt[1, 503, ], type = "l")
@@ -453,10 +415,11 @@ factors.plt.upr <- apply(factors.sim.plt, c(1, 2), quantile, probs = 0.95)
 
 factors.plt <- factors %*% D.plt
 
-par(mfrow = c(2, 1), mar = c(3.1, 3.1, 0.1, 3.1))
+par(mfrow = c(2, 1), mar = c(3.1, 3.1, 2.1, 0.1))
 for (i in 1:2){
   plot(factors.plt.mean[i, ], type = "n", ylab = "", xlab = "", las = 1,
-       ylim = range(factors.plt.lwr[i, ], factors.plt.upr[i, ]), col = "gold")
+       ylim = range(factors.plt.lwr[i, ], factors.plt.upr[i, ]), col = "gold",
+       main = paste("Factor", i))
   xcoord <- c(1:TpH, TpH:1)
   ycoord <- c(factors.plt.lwr[i, ], rev(factors.plt.upr[i, ]))
   polygon(xcoord, ycoord, border = "darkblue", col = rgb(0, 0, 0.5, 0.5))
@@ -464,7 +427,5 @@ for (i in 1:2){
   #par(new = T)
   points(factors.plt[, i], type = "l", lty = 2, 
          lwd = 1.5, col= "red")
-  axis(4, las = 1)
 }
-
 

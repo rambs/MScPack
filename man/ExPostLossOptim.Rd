@@ -3,7 +3,8 @@
 \alias{ExPostLossOptim}
 \title{DFM quadratic loss optimisation}
 \usage{
-ExPostLossOptim(Lambda, LambdaStar, PhiBar, PhiStar)
+ExPostLossOptim(Lambda, LambdaStar, PhiBar, PhiStar, n.values = 0,
+  seed = as.numeric(Sys.time()))
 }
 \arguments{
 \item{Lambda}{loadings matrix. See details.}
@@ -16,10 +17,10 @@ ExPostLossOptim(Lambda, LambdaStar, PhiBar, PhiStar)
 }
 \value{
 A list which contains rotation matrix, rotated loadings,
-and rotated PhiBar.
+  and rotated PhiBar.
 }
 \description{
 This function enables one to optimise the quadratic loss
-of a DFM.
+  of a DFM.
 }
 

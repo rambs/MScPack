@@ -1,8 +1,8 @@
-# Pacote MScPack
-# Descricao: Funcoes para WOP
-# Autor: Rafael Barcellos
-# Data: 20/05/2014
-# R 3.0.2
+# MScPack
+# Description: WOP and PLT functions
+# Author: Rafael Barcellos
+# Last updated 26th June, 2014
+# R 3.1.0
 
 #' Matriz de cargas via WOP
 #' 
@@ -44,13 +44,18 @@ plt.fdlm <- function(Lambda){
   N = dim(Lambda)[3]
   LambdaPLT = Lambda
   k = dim(Lambda)[2]
-  Q.Lambda = array(NA, c(k, k, N))
+  D.plt = array(NA, c(k, k, N))
   for (r in 1:N){
     qr.Lambda = qr(t(Lambda[,,r]))
     LambdaPLT[,,r] = t(qr.R(qr.Lambda))
     reflexion = diag(sign(diag(LambdaPLT[,,r])))
     LambdaPLT[,,r] = LambdaPLT[,,r] %*% reflexion
-    Q.Lambda[,,r] = reflexion %*% t(qr.Q(qr.Lambda))
+    D.plt[,,r] = qr.Q(qr.Lambda) %*% reflexion
   }
-  return(list(LambdaPLT = LambdaPLT, Q = Q.Lambda))
+  # Lambda' = Q %*% R
+  # Lambda = R' %*% Q'
+  # Lambda %*% Q = R'
+  # Lambda %*% Q %*% reflexion = R' %*% reflexion = Lambda_PLT
+  # :. D.plt = Q %*% reflexion
+  return(list(LambdaPLT = LambdaPLT, D.plt = D.plt))
 }

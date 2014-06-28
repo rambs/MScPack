@@ -15,7 +15,7 @@ Rotated \code{PhiBar}.
 }
 \description{
 Given an orthogonal matrix D, do right and left rotations to
-the matrix of VAR parameters.
+  the matrix of VAR parameters.
 }
 \details{
 The rotation is of the form \eqn{D' \Phi[j] D}, where

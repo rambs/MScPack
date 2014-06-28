@@ -1,12 +1,24 @@
 README
 ========================================================
 
+#### 2014-06-21
+
+Passos dados:
+
+- Revistos os passos para a otimização da função de perda quadrática ex-post. Ainda não foi solucionado o problema. Pelos testes realizados, a otimização parece estar correta. Preciso ler o artigo com mais calma para tentar encontrar qual a nuância que deixei passar.
+
+Próximos passos:
+
+- Aplicar modelo de regressão fatorial para começar a analisar os dados;
+- Rever códigos da otimização da função de perda;
+- Juntar modelo de volatilidade estocástica aos modelos fatoriais na forma PLT.
+
 #### 2014-06-19
 
 Passos dados:
 
-- Todas as funções para a aplicação do modelo fatorial dinâmico (`SampleDynFactors`, `SampleVarParms` e `SampleDfmLoads`) foram validadas, comparadas com a estimação via mínimos quadrados e avaliadas quanto a convergência da posteriori para o verdadeiro valor quando a amostra aumenta.
-- A otimização da função de perda para solucionar o problema da rotação não foi solucionada. Avancei no estudo da otimização, mas os resultados ainda não estão corretos. Talvez haja algum erro de definição da função de perda ou alguma conta feita erroneamente.
+- Todas as funções para a aplicação do modelo fatorial dinâmico (`SampleDynFactors`, `SampleVarParms` e `SampleDfmLoads`) foram validadas, comparadas com a estimação via mínimos quadrados e avaliadas quanto à convergência da *posteriori* para o verdadeiro valor quando a amostra aumenta.
+- A otimização da função de perda para solucionar o problema da rotação não foi solucionada. Avancei no estudo da otimização, mas os resultados ainda não estão corretos. Talvez haja algum erro na definição da função de perda ou alguma conta feita erroneamente.
 
 Passos futuros:
 

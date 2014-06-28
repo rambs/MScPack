@@ -13,7 +13,7 @@ Output of the \code{optim()} function.
 }
 \description{
 This function uses a heuristic optimization to the
-quadratic loss function of the ex-post approach towards the rotation
-problem.
+  quadratic loss function of the ex-post approach towards the rotation
+  problem.
 }
 

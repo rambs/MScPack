@@ -18,13 +18,13 @@ BuildExPostRtdLoss(Lambda, LambdaStar, PhiBar, PhiStar)
 A function with two arguments:
 \itemize{
   \item \code{parms} (which contains the parameters that build the orthogonal
-  matrix); and
+    matrix); and
   \item \code{reflexion} (element which defines if the orthogonal matrix has
-  positive or negative determinant).
+    positive or negative determinant).
 }
 }
 \description{
 This function builds the quadratic loss function of a
-rotation matrix using the \code{BuildOrthMat} function parameterisation.
+  rotation matrix using the \code{BuildOrthMat} function parameterisation.
 }
 
