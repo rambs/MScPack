@@ -1,7 +1,7 @@
 # MScPack
-# Description: Random generation of DFM(s, h)
+# Description: Random generation of DFM(s, 3)
 # Author: Rafael Barcellos
-# Last updated 21st June 2014
+# Last updated 2nd July, 2014
 # R 3.1.0
 
 # defining parms ----------------------------------------------------------
@@ -10,10 +10,8 @@ TT <- abs(scan(n = 1, what = integer())) # time span
 psi <- c(0.02, 0.19, 0.36, 0.02, 0.02, 
          0.19, 0.19, 0.36, 0.36) # idiosyncratic variances
 q <- length(psi) # number of variables
-message("Insert the number of factors:")
-k <- 2 #abs(scan(n = 1, what = integer())) # number of factors
-message("Insert the factors' VAR order:")
-h <- 3 #scan(n = 1, what = integer()) # VAR order
+k <- 2 # number of factors
+h <- 3 # VAR order
 r <- h*k # number of state parms in FFBS
 
 time.id <- (1-h):TT

@@ -266,7 +266,6 @@ ExPostLossOptim <- function(Lambda, LambdaStar, PhiBar, PhiStar,
 #'   (best) values for them.
 RunDfmExPostOptAlg <- function(LambdaBar, PhiBar, tol = 1e-7, max.iter = 10){
   start.time <- Sys.time()
-<<<<<<< HEAD
   
   N <- dim(LambdaBar)[3]
   k <- nrow(PhiBar)
@@ -280,7 +279,7 @@ RunDfmExPostOptAlg <- function(LambdaBar, PhiBar, tol = 1e-7, max.iter = 10){
   
   LambdaD <- array(NA, c(dim(Lstar), N))
   Phi.rtd <- array(NA, dim(PhiBar))
-=======
+
   # initial values
   Lstar <- LambdaBar.sim[,, N]
   dim(Lstar) <- c(q, k, s+1)
@@ -289,7 +288,7 @@ RunDfmExPostOptAlg <- function(LambdaBar, PhiBar, tol = 1e-7, max.iter = 10){
   
   LambdaD <- array(NA, c(dim(Lstar), N))
   Phi.rtd <- array(NA, dim(PhiBar.sim))
->>>>>>> 78330ae168a348465f3583da84526799b54a60b7
+
   D <- array(NA, c(ncol(Lstar), ncol(Lstar), N))
   
   if (max.iter <= 0){
@@ -305,28 +304,21 @@ RunDfmExPostOptAlg <- function(LambdaBar, PhiBar, tol = 1e-7, max.iter = 10){
   
   while (eps > tol){
     if (it >= max.iter){
-<<<<<<< HEAD
       stop("Iteration limit reached without convergence.")
-=======
       warning(paste("Number of iterations has reached 'max.iter' limit of", 
                     max.iter))
-      break
->>>>>>> 78330ae168a348465f3583da84526799b54a60b7
     }
     Lstar0 <- Lstar
     Pstar0 <- Pstar
     for (j in 1:N){
-<<<<<<< HEAD
       Ls <- LambdaBar[,, j]
       dim(Ls) <- c(q, k, s+1)
       Ls <- do.call("rbind", lapply(1:(s+1), function(i) Ls[,, i]))
       Ps <- PhiBar[,, j]
-=======
       Ls <- LambdaBar.sim[,, j]
       dim(Ls) <- c(q, k, s+1)
       Ls <- do.call("rbind", lapply(1:(s+1), function(i) Ls[,, i]))
       Ps <- PhiBar.sim[,, j]
->>>>>>> 78330ae168a348465f3583da84526799b54a60b7
       out.opt <- ExPostLossOptim(Ls, Lstar, Ps, Pstar)#, n.values = 0)
       LambdaD[,, j]  <- out.opt$Lambda.opt
       D[,, j] <- out.opt$D.opt

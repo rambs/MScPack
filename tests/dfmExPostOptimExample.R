@@ -10,15 +10,15 @@ library(MScPack)
 
 # sourcing DFM(2, 3) ------------------------------------------------------
 
-source("tests/RandGenDfmSVarH.R")
+source("tests/RandGenDfmSVar3.R")
 500
 1
 
 # sampling loads, factors, and VAR parms ----------------------------------
 
-N <- 1e3
-thin <- 2
-burn <- 5e3
+N <- 2e4
+thin <- 1
+burn <- 2e4
 
 LambdaBar.sim <- array(NA, c(q, k*(s+1), N))
 PhiBar.sim <- array(NA, c(k, k*h, N))
@@ -142,10 +142,14 @@ for (i in 1:2){
   axis(4, las = 1)
 }
 
-# The factors' posterior paths are similar to those of the true
-#   factors. 
-# We need to find the arguments that minimize the ex-post loss 
-#   function.
+# estimated variances -----------------------------------------------------
+
+par(mfrow = c(3, 3), mar = c(2.1, 2.1, 1.0, 0.5))
+for (i in 1:q){
+  hist(psi.sim[, i], breaks = 50, col = "darkblue", 
+       main = "")#, xlim = range(psi.sim))
+  abline(v = psi[i], col = "red")
+}
 
 # estimated levels of the series ------------------------------------------
 
@@ -177,35 +181,39 @@ for (i in 1:q){
   #polygon(xcoord, ycoord, border = "darkblue", col = rgb(0, 0, 0.5, 0.001))
 }
 
-level.mcmc <- level.sim
-dim(level.mcmc) <- c(TT*q, N)
-level.mcmc <- t(level.mcmc)
-dim(level.mcmc)
+# analyzing convergence ---------------------------------------------------
 
-dim(LambdaBar.sim)
-tmp <- LambdaBar.sim[, 1:k,]
-tmp <- apply(tmp, 3, tcrossprod)
-tmp <- t(tmp)
+lambda.mcmc <- LambdaBar.sim[, 1:k,]
+lambda.mcmc <- apply(lambda.mcmc, 3, tcrossprod)
+lambda.mcmc <- t(lambda.mcmc)
 
 LLt <- tcrossprod(LambdaBar[, 1:k])
 par(mfrow = c(q, q), mar = rep(0.1, 4))
 for (i in 1:(q^2)){
-  plot(tmp[, i], type = "l")
+  plot(lambda.mcmc[, i], type = "l")
   abline(h = as.vector(LLt)[i], col = 2)
 }
 
 library(MCMCpack)
-gd <- geweke.diag(tmp)
-rd <- raftery.diag(tmp)
+gd <- geweke.diag(lambda.mcmc)
+rd <- raftery.diag(lambda.mcmc)
 
 par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1))
 plot(abs(gd$z)) # no case grater than 1 in absolute values
 abline(h = 1)
 
+# analyzing temporal dependence -------------------------------------------
+
+par(mfrow = c(q, q), mar = rep(0.1, 4))
+for (i in 1:(q^2)){
+  acf(lambda.mcmc[, i], lag.max = 200)
+}
+
 # quadratic loss optimization ---------------------------------------------
 
-tmp <- RunDfmExPostOptAlg(LambdaBar.sim, PhiBar.sim, max.iter = 1)
+tmp <- RunDfmExPostOptAlg(LambdaBar.sim, PhiBar.sim, max.iter = 10)
 
+detach(tmp)
 attach(tmp)
 
 # analyzing optimisation results ------------------------------------------
@@ -230,11 +238,8 @@ for (i in 1:nrow(LambdaS)){
 par(mfrow = dim(LambdaBar), mar = rep(0.1, 4))
 for (i in 1:nrow(LambdaS)){
   for (j in 1:ncol(LambdaS)){
-    hist(LambdaD[i, j, ], col = rgb(0, 0, 0.5, 0.3), breaks = 30, 
-         xlim = range(LambdaD), main = "", border = rgb(0,0,0.5,0.3))
-    par(new = T)
-    hist(tmp$Lambda[i, j, ], col = rgb(0, 0, 0.5, 0), breaks = 30, 
-         xlim = range(tmp$Lambda), main = "", border = rgb(0,0,0,0.3))
+    hist(LambdaD[i, j, ], col = rgb(0, 0, 0.5), breaks = 30, 
+         xlim = range(LambdaD), main = "", border = rgb(0, 0, 0.5))
     abline(v = LambdaS.opt[i, j], col = "red")
   }
 }
@@ -257,7 +262,7 @@ par(mfrow = c(2, 6), mar = c(2.1, 2.1, 1.0, 0.5))
 for (i in 1:k){
   for (j in 1:(h*k)){
     hist(Phi.rtd[i, j, ], col = "darkblue", breaks = 30,
-         main = "")#, xlim = range(Phi.rtd))
+         main = "", border = "darkblue")#, xlim = range(Phi.rtd))
     abline(v = PhiBar.opt[i, j], col = "red")
   }
 }
@@ -292,7 +297,6 @@ for (i in 1:(q*(s+1))){
   }
 }
 
-
 lmat <- matrix(1:(k*(s+1)*q), ncol = k, byrow = T)
 lmat <- t(lmat)
 dim(lmat) <- c(k, q, (s+1))
@@ -301,17 +305,17 @@ layout(lmat)
 for (i in 1:(q*(s+1))){
   for (j in 1:k){
     hist(LambdaPLT[i, j, ], col = "darkblue", xlim = range(LambdaPLT),
-         main = "", breaks = 100)
+         main = "", breaks = 100, border = "darkblue")
     abline(v = LambdaS.plt[i, j], col = "red")
   }
 }
 
-# analyzing bimodal results -----------------------------------------------
+# analyzing the determinant of rotation matrices --------------------------
 
 det.D <- apply(D, 3, det)
-plot(det.D)
-# the determinants are all equal to one. It must be studied if some of them
-# should be negative to avoid the bimodal behaviour of the posterior.
+all.equal(det.D, rep(1, length(det.D)))
+
+# PLT Phi -----------------------------------------------------------------
 
 Phi.plt <- RotatePhi(PhiBar, D.plt)
 Phi.sim.plt <- array(NA, c(k, k*h, N))
@@ -322,7 +326,7 @@ for (i in 1:N){
 par(mfrow = c(2, 6), mar = c(2.1, 2.1, 1.0, 0.5))
 for (i in 1:k){
   for (j in 1:(h*k)){
-    plot(Phi.sim.plt[i, j, ], col = "darkblue", type = "p",
+    plot(Phi.sim.plt[i, j, ], col = "darkblue", type = "p", pch = 20,
          main = "", #paste("PhiBar[", i, ",", j, "]", sep = ""),
          ylim = range(Phi.sim.plt))
     abline(h = Phi.plt[i, j], col = "red")
@@ -333,7 +337,7 @@ par(mfrow = c(2, 6), mar = c(2.1, 2.1, 1.0, 0.5))
 for (i in 1:k){
   for (j in 1:(h*k)){
     hist(Phi.sim.plt[i, j, ], col = "darkblue", breaks = 50, 
-         border = rgb(0,0,0.5),
+         border = "darkblue",
          main = "")#, #paste("PhiBar[", i, ",", j, "]", sep = ""),
     #xlim = range(Phi.sim.plt))
     abline(v = Phi.plt[i, j], col = "red")
@@ -394,7 +398,6 @@ for (j in 1:N){
   factors.sim.plt[,, j] <- t(D.sim.plt[,, j]) %*% factors.sim[,, j]
 }
 
-dim(factors.sim.plt)
 par(mfrow = c(1, 1))
 plot(factors.sim.plt[1, 1, ], type = "l")
 plot(factors.sim.plt[1, 503, ], type = "l")
@@ -429,3 +432,5 @@ for (i in 1:2){
          lwd = 1.5, col= "red")
 }
 
+mean(factors.plt < t(factors.plt.lwr))
+mean(factors.plt > t(factors.plt.upr))

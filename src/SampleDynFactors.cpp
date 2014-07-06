@@ -11,8 +11,9 @@
 using namespace Rcpp;
 using namespace arma;
 
-// It's important to note that the prior distribution of every factor before t = 1
-//  was chosen so as to avoid the use of Metropolis step within the Gibbs sampler.
+// It's important to note that the prior distribution of every factor before 
+//  t = 1 was chosen so as to avoid the use of Metropolis step within the Gibbs 
+//  sampler.
 // A simple way to do that is to consider those factors following a normal
 //  distribution with mean zero and variance equals to identity.
 
@@ -66,10 +67,10 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     
     // definition of prior hyperparms
     m.zeros();
-    C.slice(0) = 1e2*eye(r, r);
+    C.slice(0) = 1e2 * eye(r, r);
     
-    // forward filter
-    // the filter is done considering the factorisation in square root form.
+    // Forward filter
+    // The filter is done considering the factorisation in square root form.
     // To do so we need to specify:
     arma::mat L;
     arma::vec eigval;
@@ -99,7 +100,7 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
       
     }
     
-    // backward sampling
+    // Backward sampling
     
     // generating normal random variables
     arma::vec phi = m.col(T) + rootC.t() * randn(r, 1);
@@ -107,8 +108,9 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
     
     // reordering the matrix
     IntegerVector colOrder = seq_len(h)-1;
-    std::reverse(colOrder.begin(), colOrder.end());//it must be checked if this works fine
-    //std::reverse checked in MScPackExamples/examples/rcppRev.R and worked ok.
+    std::reverse(colOrder.begin(), colOrder.end());
+    // it must be checked if this works fine
+    // std::reverse checked in MScPackExamples/examples/rcppRev.R and worked ok.
     
     // since the factos before t=1 are N(0,I), they must be sampled backward
     arma::mat factors(k, T+h); 
@@ -164,7 +166,7 @@ arma::mat SampleDynFactors(arma::mat Y, arma::mat LambdaBar, arma::mat PhiBar,
       }
     }
     return factors;
-      //is it possible to do this conditioning faster?
+      // Is it possible to do this conditioning faster?
       // Maybe using the results presented in Bai and Wang (2012) p.47
       
   }

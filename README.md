@@ -1,6 +1,46 @@
 README
 ========================================================
 
+#### 2014-07-06
+
+Passos dados:
+
+ - Algoritmo para simulação dos fatores com volatilidade estocástica implementado;
+ - Simulação das volatilidades estocásticas validada;
+ - Simulação das cargas fatoriais na forma PLT para FSV programada corretamente e de maneira eficiente;
+ - Amostragem dos parâmetros de autorregressão da volatilidade estocástica validada via Gibbs no arquivo `SampleSvTest.R`;
+ - Testes feitos no arquivo `SampleFsvFactorsTest.R` para validar funções criadas.
+ - No arquivo `tests/src/SampleSvItMn.cpp` foi testada a velocidade do algoritmo FFBS para simulação das volatilidades quando as variáveis latentes auxiliares da aproximação por mistura de normais é feita a cada iteração do filtro progressivo. Quando as variáveis latentes auxiliares são simuladas antes do filtro progressivo (usando a função `GetLogX2ApproxParms`), o algoritmo fica três vezes mais rápido do que quando se o aplica dentro do filtro.
+ 
+Passos futuros:
+ 
+ - Rever documentação das funções;
+ - Construir FFBS para fatores dinâmicos com volatilidade estocástica;
+ - Construir funções que calculam a verossimilhança marginal dos modelos FSV e DFSV para comparação de modelos;
+ - Aplicar modelo de regressão fatorial;
+ - Aplicar modelo de regressão fatorial com volatilidade estocástica (FSVR);
+ - Aplicar modelo fatorial dinâmico;
+ - Programar função que amostra cargas fatoriais a partir das restrições de Bai e Wang (2012) para aplicar modelo fatorial dinâmico multinível.
+ - Aplicar modelo fatorial dinâmico multinível;
+ - Aplicar modelo fatorial dinâmico de volatilidade estocástica;
+ - Aplicar modelo fatorial dinâmico multinível com volatilidade estocástica;
+ - Gerar dados artificiais para ilustração dos modelos;
+ - Realizar análise de resíduos (correlogramas e covariâncias)
+ 
+#### 2014-07-03
+
+Passos dados:
+
+ - Código da função de perda validado. A estimação dos parâmetros fica bastante próxima dos verdadeiros parâmetros. Há somente lentidão de convergência quando a ordem dinâmica dos fatores na equação das observações é próxima da ordem do VAR. Entretanto, as distribuições *a posteriori* são bastante próximas dos verdadeiros parâmetros.
+ - Iniciada junção das funções que simulam a volatilidade estocástica e respectivos parâmetros para estimação do modelo fatorial de volatilidade estocástica.
+ 
+Próximos passos:
+  
+  - Transcrever funções para tirar amostras da distribuição *a posteriori* dos parâmetros do VAR da volatilidade estocástica. A criação de funções separadas traz o ganho de se poder aplicar os modelos a grande quantidade de dados e salvar as saídas das simulações em objetos do tipo `ff`, que utilizam pouca memória RAM e, consequentemente, permitem armazenar grande quantidade de simulações.
+  - Criar funções que amostram parâmetros de um modelo de regressão. A ideia é aproveitar a função que simula as cargas fatoriais, simplificando-a para o resultado dos modelos de regressão (similar ao caso s = 0).
+  - Aplicar modelo de regressão fatorial e começar análise dos dados.
+  - Transcrever funções do modelo dinâmico matriz-variado para o pacote.
+  
 #### 2014-06-21
 
 Passos dados:

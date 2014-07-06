@@ -11,7 +11,6 @@ library(MScPack)
 # sourcing DFM(2, 3) ------------------------------------------------------
 
 source("tests/RandGenDfmSVarH.R")
-<<<<<<< HEAD
 500
 1
 
